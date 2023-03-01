@@ -33,7 +33,7 @@ export default class implements Command {
 		switch (layout) {
 			case 'open-ticket': {
 				const button = new ButtonBuilder()
-					.setCustomId('open-ticket')
+					.setCustomId('create-ticket')
 					.setLabel('🛒 Открыть тикет')
 					.setStyle(ButtonStyle.Primary);
 
@@ -41,11 +41,8 @@ export default class implements Command {
 					embeds: [
 						{
 							title: 'Оформление заказа',
-							description:
-								'**Хочешь купить предметы?**' +
-								'\nНе бойся! Просто открой тикет, используя кнопку ниже.' +
-								'\nВ новосозданном канале мы тебе расскажем, что нужно делать дальше.',
-							color: ColorUtil.INVISIBLE_COLOR,
+							description: 'Нажми на кнопку ниже',
+							color: ColorUtil.BLUE_COLOR,
 							footer: { text: 'Желаем удачи и успешных покупок!' },
 						},
 					],

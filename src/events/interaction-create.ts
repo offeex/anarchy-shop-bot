@@ -22,6 +22,21 @@ export default class implements Event {
 			} catch (error) {
 				console.error(error);
 			}
+		} else if (interaction.isButton()) {
+			const button = bot.buttonHandler.buttons.get(interaction.customId);
+
+			if (!button) {
+				return await interaction.reply({
+					content: 'Invalid button',
+					ephemeral: true,
+				});
+			}
+
+			try {
+				button.invoke(interaction);
+			} catch (error) {
+				console.error(error);
+			}
 		}
 	}
 }

@@ -1,4 +1,5 @@
 import { Client, GatewayIntentBits } from 'discord.js';
+import ButtonHandler from './handlers/button-handler';
 import CommandHandler from './handlers/command-handler';
 import EventHandler from './handlers/event-handler';
 
@@ -9,11 +10,13 @@ export class Bot {
 
 	public readonly eventHandler = new EventHandler();
 	public readonly commandHandler = new CommandHandler();
+	public readonly buttonHandler = new ButtonHandler();
 
 	public init(): void {
 		// TODO: single manager for all handlers to manage them
 		this.eventHandler.init();
 		this.commandHandler.init();
+		this.buttonHandler.init();
 
 		try {
 			this.client.login(process.env.CLIENT_TOKEN);
