@@ -23,6 +23,7 @@ export default class CommandHandler {
 		}
 
 		if (!slashCommands.length) {
+			// no commands to register
 			return;
 		}
 

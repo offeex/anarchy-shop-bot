@@ -6,6 +6,7 @@ import {
 	ActionRowBuilder,
 } from 'discord.js';
 import Command from '../interfaces/command';
+import ColorUtil from '../utils/color-util';
 
 // TODO: replace with complete embed manager that can do more stuff
 export default class implements Command {
@@ -41,8 +42,10 @@ export default class implements Command {
 						{
 							title: 'Оформление заказа',
 							description:
-								'Чтобы **открыть** тикет, нажми на кнопку ниже под сообщением.',
-							color: 0x58a8ff,
+								'**Хочешь купить предметы?**' +
+								'\nНе бойся! Просто открой тикет, используя кнопку ниже.' +
+								'\nВ новосозданном канале мы тебе расскажем, что нужно делать дальше.',
+							color: ColorUtil.INVISIBLE_COLOR,
 							footer: { text: 'Желаем удачи и успешных покупок!' },
 						},
 					],
