@@ -3,8 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { bot } from '..';
 import Command from '../interfaces/command';
+import Handler from '../interfaces/handler';
 
-export default class CommandHandler {
+export default class CommandHandler implements Handler {
 	public readonly commands: Collection<string, Command> = new Collection();
 
 	public async init(): Promise<void> {

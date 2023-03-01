@@ -19,7 +19,7 @@ export default class implements Command {
 				.setDescription('Layout name')
 				.setRequired(true)
 				.addChoices(
-					{ name: 'Ticket system', value: 'open-ticket' },
+					{ name: 'Ticket system', value: 'create-ticket' },
 					{ name: 'Assortment', value: 'assortment-kits' },
 				),
 		);
@@ -31,7 +31,7 @@ export default class implements Command {
 		await interaction.deleteReply();
 
 		switch (layout) {
-			case 'open-ticket': {
+			case 'create-ticket': {
 				const button = new ButtonBuilder()
 					.setCustomId('create-ticket')
 					.setLabel('🛒 Открыть тикет')

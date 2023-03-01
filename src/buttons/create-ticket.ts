@@ -23,7 +23,9 @@ export default class implements Button {
 				embeds: [
 					{
 						title: 'Ошибка',
-						description: `У тебя уже открыт тикет!\nПроверь канал \`${existing.name}\``,
+						description:
+							'У тебя уже открыт тикет!' +
+							`\nПроверь канал \`${existing.name}\``,
 						color: ColorUtil.RED_COLOR,
 					},
 				],
@@ -31,6 +33,7 @@ export default class implements Button {
 			});
 		}
 
+		// creating new channel and setting permissions for user
 		const ticket: TextBasedChannel = await interaction.guild?.channels.create({
 			name: `👔┃покупка-${interaction.member?.displayName}`,
 			type: ChannelType.GuildText,
@@ -63,6 +66,7 @@ export default class implements Button {
 			ephemeral: true,
 		});
 
+		// ghost ping for everyone in ticket
 		const message = await ticket.send('@everyone');
 		message.delete();
 	}
