@@ -1,12 +1,12 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
 export default interface Command {
-	data:
-		| SlashCommandBuilder
-		| Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
+  data:
+    | SlashCommandBuilder
+    | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
 
-	invoke(
-		interaction: ChatInputCommandInteraction,
-		...args: any[]
-	): Promise<void> | void;
+  invoke(
+    interaction: ChatInputCommandInteraction,
+    ...args: any[]
+  ): Promise<void> | void;
 }

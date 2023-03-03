@@ -1,3 +1,3 @@
 export default interface Handler {
-	init(...args: any[]): Promise<void> | void;
+  init(...args: any[]): Promise<void> | void;
 }
