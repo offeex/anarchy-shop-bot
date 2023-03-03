@@ -8,5 +8,5 @@ export default interface Command {
 	invoke(
 		interaction: ChatInputCommandInteraction,
 		...args: any[]
-	): Promise<any> | void;
+	): Promise<void> | void;
 }
