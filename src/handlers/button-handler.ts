@@ -1,10 +1,10 @@
 import { Collection } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
-import Button from '../interfaces/button';
-import Handler from '../interfaces/handler';
+import Initiable from './initiable';
+import Button from '../base/button';
 
-export default class ButtonHandler implements Handler {
+export default class ButtonHandler implements Initiable {
   public readonly buttons: Collection<string, Button> = new Collection();
 
   public async init(): Promise<void> {

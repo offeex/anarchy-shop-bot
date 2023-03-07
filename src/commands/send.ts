@@ -5,11 +5,11 @@ import {
   ButtonStyle,
   ActionRowBuilder,
 } from 'discord.js';
-import Command from '../interfaces/command';
+import Command from '../base/command';
 import ColorUtil from '../utils/color-util';
 
 // TODO: replace with complete embed manager that can do more stuff
-export default class implements Command {
+export default class extends Command {
   public data = new SlashCommandBuilder()
     .setName('send')
     .setDescription('Easy-to-use embed manager')
@@ -24,7 +24,9 @@ export default class implements Command {
         ),
     );
 
-  public async invoke(interaction: ChatInputCommandInteraction): Promise<void> {
+  public async execute(
+    interaction: ChatInputCommandInteraction,
+  ): Promise<void> {
     const layout = interaction.options.getString('layout');
 
     await interaction.deferReply();
@@ -41,7 +43,9 @@ export default class implements Command {
           embeds: [
             {
               title: 'Оформление заказа',
-              description: 'Нажми на кнопку ниже',
+              description:
+                'Чтобы открыть тикет, нажми на кнопку ниже под сообщением.' +
+                '\nДалее, следуй инструкции, которую бот напишет в тикете',
               color: ColorUtil.BLUE_COLOR,
               footer: { text: 'Желаем удачи и успешных покупок!' },
             },

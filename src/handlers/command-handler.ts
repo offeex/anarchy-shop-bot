@@ -1,11 +1,11 @@
 import { ApplicationCommandDataResolvable, Collection } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
+import Initiable from './initiable';
 import { bot } from '..';
-import Command from '../interfaces/command';
-import Handler from '../interfaces/handler';
+import Command from '../base/command';
 
-export default class CommandHandler implements Handler {
+export default class CommandHandler implements Initiable {
   public readonly commands: Collection<string, Command> = new Collection();
 
   public async init(): Promise<void> {

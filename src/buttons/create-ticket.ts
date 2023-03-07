@@ -4,14 +4,17 @@ import {
   TextBasedChannel,
   ChannelType,
   PermissionsBitField,
+  ButtonBuilder,
+  ButtonStyle,
+  ActionRowBuilder,
 } from 'discord.js';
-import Button from '../interfaces/button';
+import Button from '../base/button';
 import ColorUtil from '../utils/color-util';
 
-export default class implements Button {
+export default class extends Button {
   public name = 'create-ticket';
 
-  public async invoke(
+  public async execute(
     interaction: ButtonInteraction<'cached'>,
   ): Promise<InteractionResponse | undefined> {
     // check if user have any existing tickets
@@ -69,5 +72,26 @@ export default class implements Button {
     // ghost ping for everyone in ticket
     const message = await ticket.send('@everyone');
     message.delete();
+
+    const button = new ButtonBuilder()
+      .setCustomId('close-ticket')
+      .setLabel('🔒 Закрыть тикет')
+      .setStyle(ButtonStyle.Primary);
+
+    await ticket.send({
+      embeds: [
+        {
+          title: 'Покупка китов',
+          description:
+            'Укажи информацию о своем заказе, заполнив формы ниже сообщения' +
+            '\n\n> Напиши продавцу в личные сообщения, если не получается заполнить информацию или происходит какая-то ошибка',
+          color: ColorUtil.BLUE_COLOR,
+          footer: {
+            text: 'После заполнения жди ответа, продавец напишет как можно скорее',
+          },
+        },
+      ],
+      components: [new ActionRowBuilder<ButtonBuilder>().addComponents(button)],
+    });
   }
 }

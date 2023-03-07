@@ -1,12 +1,13 @@
-import { Events, Interaction } from 'discord.js';
+import { Events, Interaction, InteractionResponse } from 'discord.js';
 import { bot } from '..';
-import Event from '../interfaces/event';
+import Event from '../base/event';
 
-export default class implements Event {
+export default class extends Event {
   public on = Events.InteractionCreate;
 
-  // TODO: consider changing returnable value with InteractionResponse<?> type?
-  public async invoke(interaction: Interaction): Promise<any> {
+  public async execute(
+    interaction: Interaction,
+  ): Promise<InteractionResponse | undefined> {
     if (interaction.isChatInputCommand()) {
       const command = bot.commandHandler.commands.get(interaction.commandName);
 
@@ -18,7 +19,7 @@ export default class implements Event {
       }
 
       try {
-        command.invoke(interaction);
+        command.execute(interaction);
       } catch (error) {
         console.error(error);
       }
@@ -33,7 +34,7 @@ export default class implements Event {
       }
 
       try {
-        button.invoke(interaction);
+        button.execute(interaction);
       } catch (error) {
         console.error(error);
       }

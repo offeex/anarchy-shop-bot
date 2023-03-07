@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
+import Initiable from './initiable';
 import { bot } from '..';
-import Event from '../interfaces/event';
-import Handler from '../interfaces/handler';
+import Event from '../base/event';
 
-export default class EventHandler implements Handler {
+export default class EventHandler implements Initiable {
   public readonly events: Event[] = [];
 
   public async init(): Promise<void> {
@@ -27,7 +27,7 @@ export default class EventHandler implements Handler {
       return;
     }
     for (const event of this.events) {
-      bot.client.on(event?.on, event?.invoke.bind(event));
+      bot.client.on(event?.on, event?.execute.bind(event));
     }
   }
 }
