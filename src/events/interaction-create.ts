@@ -13,7 +13,7 @@ export default class extends Event {
 
       if (!command) {
         return await interaction.reply({
-          content: 'Invalid command',
+          content: 'Invalid command!',
           ephemeral: true,
         });
       }
@@ -28,7 +28,7 @@ export default class extends Event {
 
       if (!button) {
         return await interaction.reply({
-          content: 'Invalid button',
+          content: 'Invalid button!',
           ephemeral: true,
         });
       }
