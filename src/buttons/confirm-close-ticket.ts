@@ -1,5 +1,8 @@
-import { ButtonInteraction } from 'discord.js';
-import { bot } from '..';
+import {
+  ButtonInteraction,
+  InteractionResponse,
+  MessageInteraction,
+} from 'discord.js';
 import Button from '../base/button';
 
 export default class extends Button {
@@ -15,10 +18,11 @@ export default class extends Button {
         ViewChannel: false,
       });
 
+      await interaction.deferUpdate();
+      await interaction.message?.edit('Тикет был закрыт');
+
       await channel?.setName(`👔┃закрыт-${interaction.member?.displayName}`);
     }
-
-    await interaction.deferUpdate();
 
     // TODO: reopen ticket
   }

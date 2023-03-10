@@ -70,8 +70,8 @@ export default class extends Button {
     });
 
     // ghost ping for everyone in ticket
-    const message = await ticket.send('@everyone');
-    message.delete();
+    // const message = await ticket.send('@everyone');
+    // message.delete();
 
     const button = new ButtonBuilder()
       .setCustomId('close-ticket')

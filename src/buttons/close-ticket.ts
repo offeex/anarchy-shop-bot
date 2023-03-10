@@ -10,16 +10,12 @@ import Button from '../base/button';
 export default class extends Button {
   public name = 'close-ticket';
 
-  public async execute(
-    interaction: ButtonInteraction,
-  ): Promise<InteractionResponse | undefined> {
+  public async execute(interaction: ButtonInteraction): Promise<void> {
     const channel: any = interaction.channel;
 
     if (channel?.name.startsWith('👔┃закрыт-')) {
-      return await interaction.reply({
-        content: 'Ошибка! Тикет уже закрыт',
-        ephemeral: true,
-      });
+      await channel?.delete();
+      return;
     }
 
     const close = new ButtonBuilder()
