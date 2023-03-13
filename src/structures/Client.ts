@@ -16,7 +16,7 @@ export class ExtendedClient extends Client {
         this.loadEvents()
         this.loadCommands()
         this.loadButtons()
-        this.login(process.env.TOKEN).then(() => console.log('Logged in!'))
+        this.login(process.env.CLIENT_TOKEN).then(() => console.log('Logged in!'))
     }
 
     private loadEvents() {
