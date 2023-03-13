@@ -7,7 +7,7 @@
   "embeddedLanguageFormatting": "auto",
   "printWidth": 86,
   "quoteProps": "consistent",
-  "endOfLine": "lf",
+  "endOfLine": "auto",
   "semi": false,
   "trailingComma": "all"
 }

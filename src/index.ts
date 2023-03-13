@@ -1,9 +1,7 @@
-import { config } from 'dotenv';
-import { resolve } from 'path';
-import { Bot } from './bot';
+import { config } from 'dotenv'
+import { Bot } from './bot'
 
-config({ path: resolve(__dirname, '..', '.env') });
+config()
 
-export const bot = new Bot();
-
-bot.init().then(() => console.log('Bot is ready!'));
+export const bot = new Bot()
+bot.init().then(() => console.log('Bot is ready!'))

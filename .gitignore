@@ -4,4 +4,4 @@ node_modules
 .idea
 .vscode
 *.iml
-pnpm-lock.yaml
+*-lock.yaml
