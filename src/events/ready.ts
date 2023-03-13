@@ -1,11 +1,10 @@
-import { Events } from 'discord.js';
-import { bot } from '..';
-import Event from '../base/event';
+import { Event } from "../structures/Event";
+import { client as c } from "../index";
 
-export default class extends Event {
-  public on = Events.ClientReady;
+export default new Event('ready', async () => {
+  const commands = Array.from(c.commands.values()).map(c => c.data.toJSON())
+  const guildId = process.env.GUILD_ID
 
-  public execute(): any {
-    console.log(`Ready! Logged in as ${bot.client.user?.tag}`);
-  }
-}
+  if (guildId) await c.guilds.cache.get(guildId)?.commands.set(commands)
+  else await c.application?.commands.set(commands)
+})
