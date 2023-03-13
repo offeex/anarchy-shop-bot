@@ -6,4 +6,4 @@ config({ path: resolve(__dirname, '..', '.env') });
 
 export const bot = new Bot();
 
-bot.init();
+bot.init().then(() => console.log('Bot is ready!'));

@@ -18,11 +18,7 @@ export default class extends Event {
         });
       }
 
-      try {
-        command.execute(interaction);
-      } catch (error) {
-        console.error(error);
-      }
+      command.execute(interaction).catch((e: any) => console.error(e));
     } else if (interaction.isButton()) {
       const button = bot.buttonHandler.buttons.get(interaction.customId);
 

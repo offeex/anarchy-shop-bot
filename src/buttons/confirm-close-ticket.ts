@@ -11,6 +11,7 @@ export default class extends Button {
   public async execute(
     interaction: ButtonInteraction<'cached'>,
   ): Promise<void> {
+    // TODO: type non-null assertion
     const channel: any = interaction.channel;
 
     if (channel?.name.startsWith('👔┃покупка-')) {
