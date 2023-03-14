@@ -3,6 +3,11 @@ import { globSync } from 'glob'
 import { Event } from './Event'
 import { Command } from './Command'
 import Button from './Button'
+import { mongoose } from '@typegoose/typegoose'
+import { initStorage } from '../impl/storage'
+import { Offer, OfferModel } from '../models/offer.model'
+import { Doc } from '../utils/types.util'
+import { client } from '../index'
 
 export class ExtendedClient extends Client {
     public readonly commands: Collection<string, Command> = new Collection()
@@ -17,6 +22,9 @@ export class ExtendedClient extends Client {
         this.loadCommands()
         this.loadButtons()
         this.login(process.env.CLIENT_TOKEN).then(() => console.log('Logged in!'))
+
+        await mongoose.connect(process.env.DATABASE_URL!)
+
     }
 
     private loadEvents() {
@@ -42,6 +50,17 @@ export class ExtendedClient extends Client {
             const button: Button = require(path).default
             if (!button) continue
             this.buttons.set(button.name, button)
+        }
+    }
+
+    private async setupAssortment() {
+        await initStorage()
+        client.guilds.cache.forEach(guild => {
+            guild.channels.cache.some()
+        })
+        const offers = await OfferModel.find() as Doc<Offer>[]
+        for (const offer of offers) {
+
         }
     }
 }

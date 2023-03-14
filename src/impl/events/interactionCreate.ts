@@ -1,5 +1,5 @@
-import { client as c } from '../index'
-import { Event } from '../structures/Event'
+import { client as c } from '../../index'
+import { Event } from '../../structures/Event'
 
 export default new Event('interactionCreate', async interaction => {
   if (interaction.isCommand()) {

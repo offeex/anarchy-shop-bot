@@ -4,7 +4,7 @@ import {
   ButtonInteraction,
   ButtonStyle,
 } from 'discord.js'
-import Button from '../structures/Button'
+import Button from '../../structures/Button'
 
 export default new Button('close-ticket', async (interaction: ButtonInteraction) => {
   const channel: any = interaction.channel

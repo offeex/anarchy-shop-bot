@@ -4,8 +4,8 @@ import {
 	ButtonStyle,
 	SlashCommandBuilder,
 } from 'discord.js'
-import ColorUtil from '../utils/colorUtil'
-import { SlashCommand } from '../structures/command/SlashCommand'
+import ColorUtil from '../../utils/color.util'
+import { SlashCommand } from '../../structures/command/SlashCommand'
 
 // TODO: replace with complete embed manager that can do more stuff
 export default new SlashCommand(
