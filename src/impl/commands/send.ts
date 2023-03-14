@@ -1,9 +1,8 @@
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
-	ButtonStyle,
-	SlashCommandBuilder,
-	Colors,
+	ButtonStyle, Colors,
+	SlashCommandBuilder
 } from 'discord.js'
 import { SlashCommand } from '../../structures/command/SlashCommand'
 
@@ -43,7 +42,7 @@ export default new SlashCommand(
 							description:
 								'Чтобы открыть тикет, нажми на кнопку ниже под сообщением.' +
 								'\nДалее, следуй инструкции, которую бот напишет в тикете',
-							color: Colors.Red,
+							color: Colors.Blue,
 							footer: { text: 'Желаем удачи и успешных покупок!' },
 						},
 					],
