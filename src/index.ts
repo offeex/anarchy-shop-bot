@@ -1,7 +1,7 @@
 import { config } from 'dotenv'
-import { Bot } from './bot'
+import { ExtendedClient } from './structures/Client'
 
 config()
 
-export const bot = new Bot()
-bot.init().then(() => console.log('Bot is ready!'))
+export const client = new ExtendedClient()
+client.start().then(() => console.log('Started!'))

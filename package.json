@@ -3,35 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "commonjs",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "tsc && node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc",
-    "watch": "tsc -w",
-    "lint": "eslint ./src --fix",
-    "format": "prettier --write"
+    "watch": "tsc -w"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "discord.js": "^14.7.1",
-    "dotenv": "^16.0.3"
+    "discord.js": "^14.8.0",
+    "dotenv": "^16.0.3",
+    "glob": "^9.2.1"
   },
   "devDependencies": {
-    "@types/node": "^18.14.1",
-    "@typescript-eslint/eslint-plugin": "^5.53.0",
-    "@typescript-eslint/parser": "^5.53.0",
-
-    "eslint": "^8.34.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-config-standard-with-typescript": "^34.0.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-n": "^15.6.1",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.1.1",
-
+    "@types/glob": "^8.1.0",
+    "@types/node": "^18.15.1",
     "prettier": "^2.8.4",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.9.5"

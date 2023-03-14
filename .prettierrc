@@ -8,6 +8,5 @@
   "printWidth": 86,
   "quoteProps": "consistent",
   "endOfLine": "auto",
-  "semi": false,
-  "trailingComma": "all"
+  "semi": false
 }
