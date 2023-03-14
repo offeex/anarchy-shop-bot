@@ -3,8 +3,8 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 	SlashCommandBuilder,
+	Colors,
 } from 'discord.js'
-import ColorUtil from '../../utils/color.util'
 import { SlashCommand } from '../../structures/command/SlashCommand'
 
 // TODO: replace with complete embed manager that can do more stuff
@@ -43,7 +43,7 @@ export default new SlashCommand(
 							description:
 								'Чтобы открыть тикет, нажми на кнопку ниже под сообщением.' +
 								'\nДалее, следуй инструкции, которую бот напишет в тикете',
-							color: ColorUtil.BLUE_COLOR,
+							color: Colors.Red,
 							footer: { text: 'Желаем удачи и успешных покупок!' },
 						},
 					],
