@@ -18,8 +18,8 @@ import { initStorage } from '../impl/storage'
 import { Offer, OfferModel } from '../models/offer.model'
 import { Doc } from '../utils/types.util'
 import { client } from '../index'
-import { ColorUtil } from '../utils/color.util'
 import { attName, getAtt } from '../utils/discord.util'
+import { getHexColor, getShulkerIcon } from '../utils/color.util'
 
 export class ExtendedClient extends Client {
 	public readonly commands: Collection<string, Command> = new Collection()
@@ -102,10 +102,10 @@ export class ExtendedClient extends Client {
 			const channel = channels.find(chan => chan.name === o.category)
 			if (!channel) continue
 
-			const att = getAtt(ColorUtil.getShulkerIcon(o.color), o.color + '.png')
+			const att = getAtt(getShulkerIcon(o.color), o.color + '.png')
 			const embed = new EmbedBuilder()
 				.setAuthor({ name: o.name, iconURL: attName(att) })
-				.setColor(ColorUtil.getHexColor(o.color))
+				.setColor(getHexColor(o.color))
 				.setFields({ name: 'Цена', value: `${o.price} RUB` })
 				.setImage(o.imageURL)
 				.setThumbnail(attName(att))

@@ -17,13 +17,10 @@ export type Color =
 	| 'white'
 	| 'purple'
 
-export class ColorUtil {
+export function getHexColor(c: Color): any {
+	return Object.entries(Colors).find(([k]) => k.toLowerCase() == c)![1]
+}
 
-	public static getHexColor(c: Color): any {
-		return Object.entries(Colors).find(([k]) => k.toLowerCase() == c)![1]
-	}
-
-	public static getShulkerIcon(c: Color): string {
-		return globSync(`${__dirname}/../static/${c}.png`)[0]
-	}
+export function getShulkerIcon(c: Color): string {
+	return globSync(`${__dirname}/../static/${c}.png`)[0]
 }
