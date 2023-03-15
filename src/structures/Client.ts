@@ -4,7 +4,8 @@ import {
 	Client,
 	ClientEvents,
 	Collection,
-	EmbedBuilder, Guild,
+	EmbedBuilder,
+	Guild,
 	OverwriteType,
 	PermissionsBitField,
 	TextChannel
@@ -27,7 +28,7 @@ export class ExtendedClient extends Client {
 	public readonly buttons: Collection<string, Button> = new Collection()
 
 	constructor() {
-		super({ intents: ['Guilds', 'GuildMessages'] })
+		super({ intents: ['Guilds', 'GuildMessages', 'MessageContent'] })
 	}
 
 	public async start() {
@@ -71,25 +72,21 @@ export class ExtendedClient extends Client {
 		if (!guild) throw new Error('Guild not found')
 
 		await this.setupAssortment(guild)
-		await this.setupOrderChannel(guild)
+		await this.checkOrderChannel(guild)
 	}
 
-	private async setupOrderChannel(guild: Guild) {
-		const channelId: string = await getValue('channel:orders')
-		if (!channelId) return
+	private async checkOrderChannel(guild: Guild) {
+		const channelId: string = await getValue('channel:init')
+		if (!channelId) {
+			console.log('Order channel is not set up')
+			return
+		}
 
-		const channel = await guild.channels.fetch(channelId)
-		if (!channel) guild.channels.create({
-			name: 'orders',
-			type: ChannelType.GuildText,
-			permissionOverwrites: [{
-				allow: PermissionsBitField.Flags.ViewChannel,
-				deny: PermissionsBitField.Flags.SendMessages,
-				id: guild.roles.everyone
-			}]
-		})
-
-
+		try {
+			await guild.channels.fetch(channelId)
+		} catch (e) {
+			console.error('Order channel not found', e)
+		}
 	}
 
 	private async setupAssortment(guild: Guild) {

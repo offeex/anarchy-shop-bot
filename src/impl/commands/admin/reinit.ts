@@ -7,6 +7,6 @@ export default new SlashCommand(
 		.setDescription('Reinitialize the bot'),
 	async (interaction, client) => {
 		await client.reinit()
-		await interaction.reply('Reinitializing...')
+		return await interaction.reply('Reinitializing...')
 	}
 )
