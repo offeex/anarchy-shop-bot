@@ -40,7 +40,7 @@ export class ExtendedClient extends Client {
 	}
 
 	private loadEvents() {
-		const files = globSync(`${__dirname}/../events/*.ts`)
+		const files = globSync(`${__dirname}/../impl/events/*.ts`)
 		for (const path of files) {
 			const { event, execute }: Event<keyof ClientEvents> = require(path).default
 			this.on(event, execute)
@@ -48,7 +48,7 @@ export class ExtendedClient extends Client {
 	}
 
 	private loadCommands() {
-		const files = globSync(`${__dirname}/../commands/*/*.ts`)
+		const files = globSync(`${__dirname}/../impl/commands/**/*.ts`)
 		for (const path of files) {
 			const command: Command = require(path).default
 			if (!command) continue
@@ -83,12 +83,11 @@ export class ExtendedClient extends Client {
 					allow: PermissionsBitField.Flags.ViewChannel,
 					deny: PermissionsBitField.Flags.SendMessages,
 					id: guild.roles.everyone
-					// type: OverwriteType.Role
 				}]
 			})
 		}
 
-		const offers = await OfferModel.find() as Doc<Offer>[]
+		const offers = await OfferModel.find({ inStock: true }) as Doc<Offer>[]
 		const categories = new Set(offers.map(o => o.category))
 		let channels: TextChannel[] = []
 
