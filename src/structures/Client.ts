@@ -59,11 +59,11 @@ export class ExtendedClient extends Client {
 	}
 
 	private loadButtons() {
-		const files = globSync(`${__dirname}/../buttons/*.ts`)
+		const files = globSync(`${__dirname}/../impl/buttons/*.ts`)
 		for (const path of files) {
 			const button: Button = require(path).default
 			if (!button) continue
-			this.buttons.set(button.name, button)
+			this.buttons.set(button.customId, button)
 		}
 	}
 

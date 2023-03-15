@@ -2,7 +2,7 @@ import { ButtonInteraction } from 'discord.js'
 
 export default class Button {
   constructor(
-    public name: string,
+    public customId: string,
     public execute: (
       interaction: ButtonInteraction,
       ...args: any[]

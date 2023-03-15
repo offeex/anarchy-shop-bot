@@ -16,9 +16,9 @@ export default new Event('interactionCreate', async interaction => {
 		const button = client.buttons.get(interaction.customId)
 
 		if (!button) {
-      console.error('Button not found, button customId:', interaction.customId)
-      return await interaction.deferUpdate()
-    }
+			console.error('Button not found, button customId:', interaction.customId)
+			return await interaction.deferUpdate()
+		}
 
 		button.execute(interaction, client)
 	}

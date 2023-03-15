@@ -57,13 +57,13 @@ export default new SlashCommand(
 			}
 			case 'ticket': {
 				const embed = new EmbedBuilder()
-					.setTitle('Откройте тикет')
+					.setTitle('Оформить заказ')
 					.setDescription('Нажмите на кнопку ниже, чтобы открыть тикет')
 					.setColor(Colors.Green)
 				const button = new ButtonBuilder()
+					.setCustomId('create-ticket')
 					.setLabel('Создать заказ')
 					.setStyle(ButtonStyle.Primary)
-					.setCustomId('ticket:open')
 				const ar = new ActionRowBuilder<ButtonBuilder>()
 					.setComponents(button)
 				payload = { embeds: [embed], components: [ar] }

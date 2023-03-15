@@ -1,10 +1,12 @@
 import { Event } from "../../structures/Event";
-import { client as c } from "../../index";
+import { client } from "../../index";
 
 export default new Event('ready', async () => {
-  const commands = Array.from(c.commands.values()).map(c => c.data)
+  const commands = Array.from(client.commands.values()).map(c => c.data)
   const guildId = process.env.GUILD_ID
 
-  if (guildId) (await c.guilds.fetch(guildId)).commands.set(commands)
-  else await c.application?.commands.set(commands)
+  if (guildId) {
+    const guild = await client.guilds.fetch(guildId)
+    guild.commands.set(commands)
+  } else await client.application?.commands.set(commands)
 })
