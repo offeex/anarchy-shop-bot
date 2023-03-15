@@ -1,4 +1,4 @@
-import { Offer, OfferModel } from '../models/offer.model'
+import { Offer } from '../models/offer.model'
 
 export let offers: Offer[] = [
 	{
@@ -26,14 +26,3 @@ export let offers: Offer[] = [
 		inStock: true
 	}
 ]
-
-export async function initStorage() {
-	try {
-		for (const offer of offers) {
-			await OfferModel.create({ ...offer })
-		}
-	} catch (e: any) {
-		if (e.__proto__.name != 'MongoServerError' || e.code != 11000)
-			throw e
-	}
-}

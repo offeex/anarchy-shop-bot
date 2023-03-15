@@ -1,5 +1,6 @@
 import { SlashCommand } from '../../../structures/command/SlashCommand'
 import { ChannelType, SlashCommandBuilder } from 'discord.js'
+import { setIfNotExists } from '../../../utils/storage.util'
 
 export default new SlashCommand(
 	new SlashCommandBuilder()
@@ -21,6 +22,8 @@ export default new SlashCommand(
 
 		const purpose = interaction.options.getString('purpose')
 		if (!purpose) return interaction.reply('You must specify a purpose')
+
+		setIfNotExists(`channel:${purpose}`, channel.id)
 
 		await interaction.reply(`Channel set to ${channel} for ${purpose}`)
 	}

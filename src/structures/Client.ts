@@ -4,7 +4,7 @@ import {
 	Client,
 	ClientEvents,
 	Collection,
-	EmbedBuilder,
+	EmbedBuilder, Guild,
 	OverwriteType,
 	PermissionsBitField,
 	TextChannel
@@ -14,12 +14,13 @@ import { Event } from './Event'
 import { Command } from './Command'
 import Button from './Button'
 import { mongoose } from '@typegoose/typegoose'
-import { initStorage } from '../impl/storage'
 import { Offer, OfferModel } from '../models/offer.model'
 import { Doc } from '../utils/types.util'
 import { client } from '../index'
 import { attName, getAtt } from '../utils/discord.util'
 import { getHexColor, getShulkerIcon } from '../utils/color.util'
+import { offers } from '../impl/storage'
+import { getValue, setValue } from '../utils/storage.util'
 
 export class ExtendedClient extends Client {
 	public readonly commands: Collection<string, Command> = new Collection()
@@ -36,7 +37,7 @@ export class ExtendedClient extends Client {
 		this.login(process.env.TOKEN).then(() => console.log('Logged in!'))
 
 		await mongoose.connect(process.env.DATABASE_URL!)
-		this.setupAssortment()
+		this.reinit()
 	}
 
 	private loadEvents() {
@@ -65,15 +66,45 @@ export class ExtendedClient extends Client {
 		}
 	}
 
-	private async setupAssortment() {
-		await initStorage()
-
+	public async reinit() {
 		const guild = await client.guilds.fetch(process.env.GUILD_ID!)
 		if (!guild) throw new Error('Guild not found')
 
-		let category = guild.channels.cache.find(c =>
-			c.name === 'Ассортимент' && c.type === ChannelType.GuildCategory
-		) as CategoryChannel
+		await this.setupAssortment(guild)
+		await this.setupOrderChannel(guild)
+	}
+
+	private async setupOrderChannel(guild: Guild) {
+		const channelId: string = await getValue('channel:orders')
+		if (!channelId) return
+
+		const channel = await guild.channels.fetch(channelId)
+		if (!channel) guild.channels.create({
+			name: 'orders',
+			type: ChannelType.GuildText,
+			permissionOverwrites: [{
+				allow: PermissionsBitField.Flags.ViewChannel,
+				deny: PermissionsBitField.Flags.SendMessages,
+				id: guild.roles.everyone
+			}]
+		})
+
+
+	}
+
+	private async setupAssortment(guild: Guild) {
+		try {
+			for (const offer of offers) await OfferModel.create({ ...offer })
+		} catch (e: any) {
+			if (e.__proto__.name != 'MongoServerError' || e.code != 11000)
+				throw e
+		}
+
+		const categoryChannelId: string = await getValue('channel:category')
+		let category: CategoryChannel | undefined
+
+		if (categoryChannelId)
+			category = await guild.channels.fetch(categoryChannelId) as CategoryChannel
 
 		if (!category) {
 			category = await guild.channels.create({
@@ -85,19 +116,20 @@ export class ExtendedClient extends Client {
 					id: guild.roles.everyone
 				}]
 			})
+			await setValue('channel:category', category.id)
 		}
 
-		const offers = await OfferModel.find({ inStock: true }) as Doc<Offer>[]
-		const categories = new Set(offers.map(o => o.category))
+		const allOffers = await OfferModel.find({ inStock: true }) as Doc<Offer>[]
+		const categories = new Set(allOffers.map(o => o.category))
 		let channels: TextChannel[] = []
 
 		for (const c of categories)
 			if (!category.children.cache.find(chan => chan.name === c))
-			channels.push(await category.children.create({
-			name: c, type: ChannelType.GuildText
-		}))
+				channels.push(await category.children.create({
+					name: c, type: ChannelType.GuildText
+				}))
 
-		for (const o of offers) {
+		for (const o of allOffers) {
 			const channel = channels.find(chan => chan.name === o.category)
 			if (!channel) continue
 
@@ -109,7 +141,7 @@ export class ExtendedClient extends Client {
 				.setImage(o.imageURL)
 				.setThumbnail(attName(att))
 
-			 channel.send({ embeds: [embed], files: [att] })
+			channel.send({ embeds: [embed], files: [att] })
 		}
 	}
 }
