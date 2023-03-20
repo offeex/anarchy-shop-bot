@@ -1,5 +1,5 @@
-import { Event } from "../../structures/Event";
-import { client } from "../../index";
+import { Event } from '../../structures/Event'
+import { client } from '../../index'
 
 export default new Event('ready', async () => {
   const commands = Array.from(client.commands.values()).map(c => c.data)
