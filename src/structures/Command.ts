@@ -2,8 +2,7 @@ import { CommandInteraction } from 'discord.js'
 import { ExtendedClient } from './Client'
 
 export type CommandExecute<T extends CommandInteraction> = (
-  interaction: T,
-  client: ExtendedClient
+  interaction: T
 ) => any
 
 export abstract class Command {

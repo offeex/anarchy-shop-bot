@@ -10,11 +10,11 @@ import {
 	Guild,
 	TextChannel
 } from 'discord.js'
-import { getValue, setIfNotExists } from '../utils/storage.util'
+import { getValue, setIfNotExists, setValue } from '../utils/storage.util'
 import { atmName, getAtm, sendWithEntry } from '../utils/discord.util'
 import { offers } from '../impl/storage'
 import { Offer, OfferModel } from '../models/offer.model'
-import { Doc } from '../utils/types.util'
+import { Doc, TicketCategoryEntry, TicketCategoryName } from '../utils/types.util'
 import { getHexColor, getShulkerIcon } from '../utils/color.util'
 
 async function createOffers() {
@@ -27,14 +27,10 @@ async function createOffers() {
 	}
 }
 
-async function setupCategoryChannel(guild: Guild): Promise<CategoryChannel> {
+async function setupAssortmentCategory(guild: Guild): Promise<CategoryChannel> {
 	const categoryChannelId = process.env.ASSORTMENT_CATEGORY_ID
 	if (!categoryChannelId) throw new Error('Assortment category ID is not set')
-
-	let category: CategoryChannel
-	category = await guild.channels.fetch(categoryChannelId) as CategoryChannel
-	if (!category) throw new Error('Assortment category not found')
-	return category
+	return await guild.channels.fetch(categoryChannelId, { force: true }) as CategoryChannel
 }
 
 function setupOfferPayload(o: Offer): BaseMessageOptions {
@@ -50,13 +46,13 @@ function setupOfferPayload(o: Offer): BaseMessageOptions {
 
 export async function setupAssortment(guild: Guild) {
 	await createOffers()
-	const category = await setupCategoryChannel(guild)
+	let category = await setupAssortmentCategory(guild)
 
 	const allOffers = await OfferModel.find({ inStock: true }) as Doc<Offer>[]
 	const assortmentChannels = new Set(allOffers.map(o => o.category))
-	let channels: TextChannel[] = []
 
 	// Creating assortment channels if they don't exist
+	let channels: TextChannel[] = []
 	for (const c of assortmentChannels)
 		if (!category.children.cache.find(chan => chan.name === c))
 			channels.push(await category.children.create({
@@ -104,4 +100,17 @@ async function setupOrderPayload(): Promise<BaseMessageOptions> {
 export async function setupOrdering(guild: Guild) {
 	const channel = await setupOrderChannel(guild)
 	await sendWithEntry('order-instruction-id', await setupOrderPayload(), channel)
+}
+
+export async function setupTicketCategories(guild: Guild) {
+	const categoryNames: TicketCategoryName[] = ['оформление', 'доставка', 'выполнено']
+	const categories: TicketCategoryEntry[] = []
+
+	for (const name of categoryNames) {
+		let c = guild.channels.cache.find(chan => chan.name === name)
+		if (!c) c = await guild.channels.create({ name, type: ChannelType.GuildCategory })
+		categories.push({ name, channelId: c.id })
+	}
+
+	await setValue('ticket-categories', categories)
 }

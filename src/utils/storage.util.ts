@@ -17,7 +17,7 @@ export async function setValue<T>(key: string, value: T): Promise<void> {
 
 export async function setIfNotExists<T>(key: string, value: T): Promise<void> {
 	try {
-		await StorageEntryModel.create({ key, value })
+		await StorageEntryModel.create({ key, value: JSON.stringify(value) })
 	} catch (e: any) {
 		if (e.__proto__.name != 'MongoServerError' || e.code != 11000)
 			throw e

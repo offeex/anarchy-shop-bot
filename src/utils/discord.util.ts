@@ -1,4 +1,4 @@
-import { AttachmentBuilder, TextChannel } from 'discord.js'
+import { ActionRowBuilder, AttachmentBuilder, TextChannel } from 'discord.js'
 import { SendOptions } from './types.util'
 import { getValue, setValue } from './storage.util'
 

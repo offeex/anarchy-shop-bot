@@ -11,7 +11,7 @@ export default new Event('interactionCreate', async interaction => {
 				ephemeral: true
 			})
 
-		command.execute(interaction, client)
+		command.execute(interaction)
 	} else if (interaction.isButton()) {
 		const button = client.buttons.get(interaction.customId)
 
@@ -20,6 +20,6 @@ export default new Event('interactionCreate', async interaction => {
 			return await interaction.deferUpdate()
 		}
 
-		button.execute(interaction, client)
+		button.execute(interaction)
 	}
 })
