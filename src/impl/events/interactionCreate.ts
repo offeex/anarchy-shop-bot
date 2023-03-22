@@ -1,5 +1,5 @@
-import { client as client } from '../../index'
-import { Event } from '../../structures/Event'
+import {client as client} from '../../index'
+import {Event} from '../../structures/Event'
 
 export default new Event('interactionCreate', async interaction => {
 	if (interaction.isCommand()) {
@@ -13,13 +13,9 @@ export default new Event('interactionCreate', async interaction => {
 
 		command.execute(interaction)
 	} else if (interaction.isButton()) {
+
 		const button = client.buttons.get(interaction.customId)
-
-		if (!button) {
-			console.error('Button not found, button customId:', interaction.customId)
-			return await interaction.deferUpdate()
-		}
-
+        if (!button) return
 		button.execute(interaction)
 	}
 })

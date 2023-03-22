@@ -5,7 +5,7 @@
   "singleQuote": true,
   "useTabs": true,
   "embeddedLanguageFormatting": "auto",
-  "printWidth": 86,
+  "printWidth": 90,
   "quoteProps": "consistent",
   "endOfLine": "auto",
   "semi": false

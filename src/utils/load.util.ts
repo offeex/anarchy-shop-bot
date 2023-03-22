@@ -1,9 +1,9 @@
-import { globSync } from 'glob'
-import { Event } from '../structures/Event'
-import { ClientEvents, Collection } from 'discord.js'
-import { Command } from '../structures/Command'
+import {globSync} from 'glob'
+import {Event} from '../structures/Event'
+import {ClientEvents, Collection} from 'discord.js'
+import {Command} from '../structures/Command'
 import Button from '../structures/Button'
-import { ExtendedClient } from '../structures/Client'
+import {ExtendedClient} from '../structures/Client'
 
 function getFiles(folder: string) {
 	return globSync(`${__dirname}/../impl/${folder}/**/*.ts`)
@@ -26,10 +26,13 @@ function loadCommands(map: Collection<string, Command>) {
 
 function loadButtons(map: Collection<string, Button>) {
 	for (const file of getFiles('buttons')) {
-		const button: Button = require(file).default
-		if (!button) continue
-		map.set(button.customId, button)
-	}
+        const button: Button = require(file).default
+        if (!button) continue
+
+        if (Array.isArray(button.customId))
+            for (const id of button.customId) map.set(id, button)
+        else map.set(button.customId, button)
+    }
 }
 
 export function load(client: ExtendedClient) {
