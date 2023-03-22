@@ -1,6 +1,6 @@
-import {DocumentType} from '@typegoose/typegoose'
-import {HydratedDocument} from 'mongoose'
-import {BaseMessageOptions, Message, MessagePayload} from 'discord.js'
+import { DocumentType } from '@typegoose/typegoose'
+import { HydratedDocument } from 'mongoose'
+import { BaseMessageOptions, Message, MessagePayload } from 'discord.js'
 
 export type Doc<T> = HydratedDocument<DocumentType<T>>
 
@@ -10,13 +10,18 @@ export type OrderKitEntry = { name: string; amount: number }
 export type TicketCategoryName = 'оформление' | 'доставка' | 'выполнено'
 export type TicketCategoryEntry = { name: TicketCategoryName; channelId: string }
 
-type TicketStage = 'create' | 'planting' | 'spot' | 'payment' | 'delivery' | 'done'
-export type TicketStageMessages = { [stage in TicketStage]?: Message }
+export class TicketStages {
+    public create!: Message
+    public planting!: Message
+    public spot!: Message
+    public payment!: Message
+    public done!: Message
+}
 
-export type TicketFee = {
-    plantingPriority?: number,
-    spotDistance?: number
-    totalAmount?: number
+export class TicketFees {
+    planting: number = 0
+    spot: number = 0
+    totalAmount!: number
 }
 
 export type PlantingType = 'plant' | 'handover'

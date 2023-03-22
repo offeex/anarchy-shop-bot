@@ -1,67 +1,77 @@
 import Button from '../../../structures/Button'
-import {getTicket, ticketFees, ticketMessages} from '../../../managers/ticket.manager'
-import {
-    ButtonBuilder,
-    ButtonStyle,
-    Colors,
-    ComponentType,
-    EmbedBuilder,
-    MessageActionRowComponentBuilder,
-} from 'discord.js'
-import {PlantingType} from '../../../utils/types.util'
-import {actionRow, resolveInteraction, toggleActionRowBuilder, toggleComponents,} from '../../../utils/discord.util'
-import {client} from '../../../index'
+import { SpotType } from '../../../utils/types.util'
+import { ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, TextChannel } from 'discord.js'
+import { getTicket, parseCustomSpot, ticketFee, ticketStage } from '../../../managers/ticket.manager'
+import { randomVec2 } from '../../../utils/number.util'
+import { actionRow, resolveInteraction, toggleComponents } from '../../../utils/discord.util'
+import { offers } from '../../../managers/offer.manager'
+import { orderedText, paymentText } from '../../../utils/text.util'
+import { TicketModel } from '../../../models/ticket.model'
 
 export default new Button(
-    ['ticket-spot-plant', 'ticket-spot-handover'],
-    async interaction => {
-        const isNewInteraction = await resolveInteraction(interaction)
+	['ticket-spot-pick', 'ticket-spot-generate'],
+	async interaction => {
+		const isInteractionNew = await resolveInteraction(interaction)
 
-        const tm = await getTicket(interaction)
-        tm.planting = isNewInteraction
-            ? (interaction.customId.split('-')[2] as PlantingType)
-            : 'plant'
-        const msg = await toggleComponents(ticketMessages.get(tm.id)!.planting!, true)
+		const t = await getTicket(interaction)
+		const msg = ticketStage(t).spot!
+		let spotType = isInteractionNew
+			? (interaction.customId.split('-')[2] as SpotType)
+			: 'pick'
 
-        const plantingReply = await msg.reply(
-            `Способ доставки выбран: **${tm.planting === 'plant' ? 'Кладом' : 'На руки'}**`
-        )
+		await toggleComponents(msg, true)
 
-        const embed = new EmbedBuilder()
-            .setTitle('Место назначения')
-            .setColor(Colors.DarkVividPink)
-            .addFields([
-                {
-                    name: 'Выбрать место',
-                    value:
-                        'Выберите место, куда будет доставлен заказ. До 20к по обычному миру - бесплатно',
-                },
-                {
-                    name: 'Сгенерировать',
-                    value:
-                        'Автоматически генерирует конечную точку заказа, до 16к по обычному миру',
-                },
-            ])
-        const pickButton = new ButtonBuilder()
-            .setCustomId('ticket-payment-pick')
-            .setLabel('Выбрать локацию')
-            .setStyle(ButtonStyle.Primary)
-        const generateButton = new ButtonBuilder()
-            .setCustomId('ticket-payment-generate')
-            .setLabel('Сгенерировать')
-            .setStyle(ButtonStyle.Secondary)
-        const spotAr = actionRow(pickButton)
+		if (spotType === 'pick') {
+			const chan = (await interaction.channel) as TextChannel
+			const cont = `Введи координаты в таком формате: -100 100, где первое число х, а второе z соответственно`
+			const { x, y } = await parseCustomSpot(chan, cont, [])
+			const distance = Math.hypot(x, y)
+			ticketFee(t).spot = distance > 40000 ? distance * 0.00125 : 0
+			t.spot = { x, y }
+		} else if (spotType === 'generate')
+			t.spot = randomVec2({ x: -16000, y: -16000 }, { x: 16000, y: 16000 })
 
-        if (tm.planting == 'handover') {
-            toggleActionRowBuilder(spotAr, true)
-            const totalAmount = ticketFees.get(tm.id)!.totalAmount!
-            ticketFees.set(tm.id, {plantingPriority: totalAmount * 0.25})
-        } else spotAr.addComponents(generateButton)
+		const reply = await msg.reply(
+			`Место назначения выбрано: **${t.spot!.x} ${t.spot!.y}**`
+		)
 
-        const reply = await plantingReply.reply({embeds: [embed], components: [spotAr]})
-        ticketMessages.set(tm.id, {spot: reply})
+		// preparing ticket-payment
+		const productsPrice = t.kits
+			.map(kit => kit.amount * offers.find(o => o.name === kit.name)!.price)
+			.reduce((a, b) => a + b)
+		const plantingFee = productsPrice * 0.25
+		const spotFee = ticketFee(t).spot
+		ticketFee(t).planting = plantingFee
+		t.totalPrice = productsPrice + plantingFee + spotFee
 
-        if (tm.planting === 'handover')
-            await client.buttons.get('ticket-payment-pick')!.execute(interaction)
-    }
+		const orderText = orderedText(t.kits)
+		const payText = paymentText(productsPrice, plantingFee, spotFee)
+		const footerText =
+			'Расстояние: 4к = 5 RUB\n' +
+			'Доставка на руки: 20% от цены'
+
+		const embed = new EmbedBuilder()
+			.setTitle('Оплата')
+			.setDescription('Автоматически проверяется, и в случае успеха тебя уведомят')
+			.setColor(Colors.Blurple)
+			.addFields([
+				{ name: 'Заказ:', value: orderText },
+				{ name: 'Оплата:', value: payText }
+			])
+			.setFooter({ text: footerText })
+
+		const payButton = new ButtonBuilder()
+			.setCustomId('ticket-payment')
+			.setLabel('Оплатить')
+			.setStyle(ButtonStyle.Success)
+		const ar = actionRow(payButton)
+
+		await reply.reply({ embeds: [embed], components: [ar] })
+
+		await TicketModel.findOneAndUpdate(
+			{ channelId: t.channelId, userId: interaction.user.id },
+			{},
+			{ upsert: true, new: true }
+		)
+	}
 )

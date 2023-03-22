@@ -1,13 +1,13 @@
 import Button from '../../../structures/Button'
-import {getTicket, getTicketContent, ticketMessages,} from '../../../managers/ticket.manager'
+import { getTicket, getTicketContent, ticketStage } from '../../../managers/ticket.manager'
+import { resolveInteraction } from '../../../utils/discord.util'
 
 export default new Button('ticket-reset-kits', async interaction => {
-    interaction.deferUpdate()
+	await resolveInteraction(interaction)
 
-    const tm = await getTicket(interaction)
-    if (tm.kits.length !== 0) {
-        tm.kits = []
-        const msg = ticketMessages.get(tm.id)!.create!
-        msg.edit({content: getTicketContent(tm)})
-    }
+	const t = await getTicket(interaction)
+	if (t.kits.length !== 0) {
+		t.kits = []
+		await ticketStage(t).create!.edit({ content: getTicketContent(t) })
+	}
 })

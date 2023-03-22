@@ -1,74 +1,60 @@
-import {
-    ButtonInteraction,
-    ButtonStyle,
-    CategoryChannel,
-    ChannelType,
-    ComponentType,
-    TextBasedChannel,
-} from 'discord.js'
+import { ButtonBuilder, ButtonStyle, CategoryChannel, ChannelType, ComponentType } from 'discord.js'
 import Button from '../../../structures/Button'
-import {Ticket, TicketModel} from '../../../models/ticket.model'
-import {getValue} from '../../../utils/storage.util'
-import {client} from '../../../index'
-import {Doc, TicketCategoryEntry} from '../../../utils/types.util'
+import { getValue } from '../../../utils/storage.util'
+import { client } from '../../../index'
+import { TicketCategoryEntry, TicketFees, TicketStages } from '../../../utils/types.util'
 import {
-    activeTickets,
-    createChooseKitMenus,
-    handleChooseKitMenus,
-    ticketMessages,
+	activeTickets,
+	checkTicket,
+	createChooseKitMenus,
+	handleChooseKitMenus,
+	ticketFees,
+	ticketStage,
+	ticketStages
 } from '../../../managers/ticket.manager'
-
-async function checkTicket(interaction: ButtonInteraction, category: CategoryChannel) {
-    const t = (await category.children.cache.find(
-        c => c.type === ChannelType.GuildText && c.topic === interaction.user.id
-    )) as TextBasedChannel
-
-    if (t) {
-        t.send(`Ваш тикет находится тут, ${interaction.user}`)
-        interaction.reply({content: 'У вас уже есть тикет', ephemeral: true})
-        return t
-    }
-
-    return null
-}
-
-async function registerTicket(
-    t: TextBasedChannel,
-    interaction: ButtonInteraction
-): Promise<Doc<Ticket>> {
-    await interaction.reply({
-        content: `Тикет успешно открыт: ${t}`,
-        ephemeral: true,
-    })
-    return TicketModel.findOneAndUpdate(
-        {channelId: t.id, userId: interaction.user.id},
-        {},
-        {upsert: true, new: true}
-    )
-}
+import { Ticket } from '../../../models/ticket.model'
+import { actionRow } from '../../../utils/discord.util'
 
 export default new Button('create-ticket', async interaction => {
-    // may be optimized
-    const categoryEntries: TicketCategoryEntry[] = await getValue('ticket-categories')
-    const categoryId = categoryEntries.find(e => e.name === 'оформление')!.channelId
-    const category = (await client.guild!.channels.fetch(categoryId)) as CategoryChannel
+	// may be optimized
+	const categoryEntries: TicketCategoryEntry[] = await getValue('ticket-categories')
+	const categoryId = categoryEntries.find(e => e.name === 'оформление')!.channelId
+	const category = (await client.guild!.channels.fetch(categoryId)) as CategoryChannel
 
-    let ticket = await checkTicket(interaction, category)
-    if (ticket) return
+	let tChannel = await checkTicket(interaction, category)
+	if (tChannel) return
 
-    ticket = await category.children.create({
-        name: `ticket-${interaction.user.username}`,
-        type: ChannelType.GuildText,
-        topic: interaction.user.id,
-    })
-    const tm = await registerTicket(ticket, interaction)
+	tChannel = await category.children.create({
+		name: `ticket-${interaction.user.username}`,
+		type: ChannelType.GuildText,
+		topic: interaction.user.id
+	})
+	await interaction.reply({
+		content: `Тикет успешно открыт: ${tChannel}`,
+		ephemeral: true
+	})
 
-    const payload = await createChooseKitMenus(ticket, tm)
-    payload.content = `Привет, выбирай нужны тебе киты, ${interaction.user}`
+	const t = new Ticket()
+	t.channelId = tChannel!.id
+	t.userId = interaction.user.id
+	ticketStages.set(tChannel.id, new TicketStages())
+	ticketFees.set(tChannel.id, new TicketFees())
 
-    activeTickets.set(ticket.id, tm)
-    const msg = await ticket.send(payload)
-    ticketMessages.set(tm.id, {create: msg})
+	const payload = createChooseKitMenus(tChannel, t)
+	const continueButton = new ButtonBuilder()
+		.setCustomId('ticket-confirm-kits')
+		.setStyle(ButtonStyle.Primary)
+		.setLabel('Я всё выбрал')
+	const resetKitsButton = new ButtonBuilder()
+		.setCustomId('ticket-reset-kits')
+		.setStyle(ButtonStyle.Danger)
+		.setLabel('Сбросить выбор')
+	payload.content = `Привет, выбирай нужны тебе киты, ${interaction.user}`
+	payload.components!.push(actionRow(continueButton, resetKitsButton))
 
-    await handleChooseKitMenus(msg, tm)
+	activeTickets.set(tChannel.id, t)
+	const msg = await tChannel.send(payload)
+	ticketStage(t).create = msg
+
+	await handleChooseKitMenus(msg, t)
 })
