@@ -1,19 +1,19 @@
 import {
-    BaseMessageOptions,
-    ButtonBuilder,
-    ButtonStyle,
-    CategoryChannel,
-    ChannelType,
-    Colors,
-    EmbedBuilder,
-    Guild,
-    TextChannel,
+	BaseMessageOptions,
+	ButtonBuilder,
+	ButtonStyle,
+	CategoryChannel,
+	ChannelType,
+	Colors,
+	EmbedBuilder,
+	Guild,
+	TextChannel
 } from 'discord.js'
-import {getValue, setIfNotExists, setValue} from '../utils/storage.util'
-import {actionRow, sendWithEntry} from '../utils/discord.util'
-import {Offer, OfferModel} from '../models/offer.model'
-import {Doc, TicketCategoryEntry, TicketCategoryName} from '../utils/types.util'
-import {createOffers, offers, setupOfferPayload} from './offer.manager'
+import { getValue, setIfNotExists, setValue } from '../utils/storage.util'
+import { actionRow, sendWithEntry } from '../utils/discord.util'
+import { Offer, OfferModel } from '../models/offer.model'
+import { Doc, TicketCategoryEntry, TicketCategoryName } from '../utils/types.util'
+import { createOffers, offers, setupOfferPayload } from './offer.manager'
 
 async function setupAssortmentCategory(guild: Guild): Promise<CategoryChannel> {
     const categoryChannelId = process.env.ASSORTMENT_CATEGORY_ID
@@ -43,7 +43,7 @@ export async function setupAssortment(guild: Guild) {
     for (const o of offers) {
         const channel = channels.find(chan => chan.name === o.category)
         if (!channel) continue
-        channel.send(setupOfferPayload(o))
+        await channel.send(setupOfferPayload(o))
     }
 }
 
@@ -78,7 +78,7 @@ async function setupOrderPayload(): Promise<BaseMessageOptions> {
 
 export async function setupOrdering(guild: Guild) {
 	const channel = await setupOrderChannel(guild)
-	await sendWithEntry('order-instruction-id', await setupOrderPayload(), channel)
+	await sendWithEntry(await setupOrderPayload(), channel)
 }
 
 export async function setupTicketCategories(guild: Guild) {

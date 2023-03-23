@@ -3,15 +3,14 @@ import { SpotType } from '../../../utils/types.util'
 import { ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, TextChannel } from 'discord.js'
 import { getTicket, parseCustomSpot, ticketFee, ticketStage } from '../../../managers/ticket.manager'
 import { randomVec2 } from '../../../utils/number.util'
-import { actionRow, resolveInteraction, toggleComponents } from '../../../utils/discord.util'
+import { actionRow, resolveInteractionUpdate, toggleComponents } from '../../../utils/discord.util'
 import { offers } from '../../../managers/offer.manager'
 import { orderedText, paymentText } from '../../../utils/text.util'
-import { TicketModel } from '../../../models/ticket.model'
 
 export default new Button(
 	['ticket-spot-pick', 'ticket-spot-generate'],
 	async interaction => {
-		const isInteractionNew = await resolveInteraction(interaction)
+		const isInteractionNew = await resolveInteractionUpdate(interaction)
 
 		const t = await getTicket(interaction)
 		const msg = ticketStage(t).spot!
@@ -31,7 +30,7 @@ export default new Button(
 		} else if (spotType === 'generate')
 			t.spot = randomVec2({ x: -16000, y: -16000 }, { x: 16000, y: 16000 })
 
-		const reply = await msg.reply(
+		const spotReply = await msg.reply(
 			`Место назначения выбрано: **${t.spot!.x} ${t.spot!.y}**`
 		)
 
@@ -66,12 +65,6 @@ export default new Button(
 			.setStyle(ButtonStyle.Success)
 		const ar = actionRow(payButton)
 
-		await reply.reply({ embeds: [embed], components: [ar] })
-
-		await TicketModel.findOneAndUpdate(
-			{ channelId: t.channelId, userId: interaction.user.id },
-			{},
-			{ upsert: true, new: true }
-		)
+		ticketStage(t).payment = await spotReply.reply({ embeds: [embed], components: [ar] })
 	}
 )

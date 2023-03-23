@@ -19,9 +19,9 @@ import { actionRow, toggleComponents } from '../utils/discord.util'
 import { offers } from './offer.manager'
 
 // Key is a channel id
-export let activeTickets: Map<string, Ticket> = new Map()
+export let activeTickets = new Map<string, Ticket>()
 export let ticketFees = new Map<string, TicketFees>()
-export let ticketStages: Map<string, TicketStages> = new Map()
+export let ticketStages = new Map<string, TicketStages>()
 
 export function ticketStage(t: Ticket): TicketStages {
 	return ticketStages.get(t.channelId)!

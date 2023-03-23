@@ -40,6 +40,10 @@ export default new Button('create-ticket', async interaction => {
 	ticketStages.set(tChannel.id, new TicketStages())
 	ticketFees.set(tChannel.id, new TicketFees())
 
+	setTimeout(() => {
+		if (!ticketStage(t).success) tChannel?.delete()
+	}, 1000 * 60 * 15)
+
 	const payload = createChooseKitMenus(tChannel, t)
 	const continueButton = new ButtonBuilder()
 		.setCustomId('ticket-confirm-kits')

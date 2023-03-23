@@ -6,6 +6,7 @@ export type Doc<T> = HydratedDocument<DocumentType<T>>
 
 export type SendOptions = string | MessagePayload | BaseMessageOptions
 
+export type InstructionEntry = { name: string, value: string, channelId: string }
 export type OrderKitEntry = { name: string; amount: number }
 export type TicketCategoryName = 'оформление' | 'доставка' | 'выполнено'
 export type TicketCategoryEntry = { name: TicketCategoryName; channelId: string }
@@ -15,7 +16,7 @@ export class TicketStages {
     public planting!: Message
     public spot!: Message
     public payment!: Message
-    public done!: Message
+    public success?: Message
 }
 
 export class TicketFees {

@@ -9,13 +9,18 @@ import {
 	MessageActionRowComponentBuilder
 } from 'discord.js'
 import { PlantingType } from '../../../utils/types.util'
-import { actionRow, resolveInteraction, toggleActionRowBuilder, toggleComponents } from '../../../utils/discord.util'
+import {
+	actionRow,
+	resolveInteractionUpdate,
+	toggleActionRowBuilder,
+	toggleComponents
+} from '../../../utils/discord.util'
 import { client } from '../../../index'
 
 export default new Button(
 	['ticket-planting-plant', 'ticket-planting-handover'],
 	async interaction => {
-		const isNewInteraction = await resolveInteraction(interaction)
+		const isNewInteraction = await resolveInteractionUpdate(interaction)
 
 		const t = await getTicket(interaction)
 		t.planting = isNewInteraction

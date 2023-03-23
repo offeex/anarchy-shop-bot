@@ -6,10 +6,10 @@ import {
     ComponentType,
     Message,
     MessageActionRowComponentBuilder,
-    TextChannel,
+    TextChannel
 } from 'discord.js'
-import {SendOptions} from './types.util'
-import {getValue, setValue} from './storage.util'
+import { SendOptions } from './types.util'
+import { getValue, setValue } from './storage.util'
 
 export function getAtm(url: string, name: string) {
 	return new AttachmentBuilder(url, { name })
@@ -34,7 +34,7 @@ export async function sendIfNotExists(
     } else return (await chan.send(msg)).id
 }
 
-export async function sendWithEntry(entry: string, msg: SendOptions, chan: TextChannel) {
+export async function sendWithEntry(msg: SendOptions, chan: TextChannel) {
     let msgId = (await getValue('order-instruction-id')) as string
     msgId = await sendIfNotExists(msg, msgId, chan)
     await setValue('order-instruction-id', msgId)
@@ -85,7 +85,7 @@ export function toggleActionRowBuilder(
     return ar
 }
 
-export async function resolveInteraction(interaction: ButtonInteraction) {
+export async function resolveInteractionUpdate(interaction: ButtonInteraction) {
     const isNew = !interaction.replied && !interaction.deferred
     if (isNew) await interaction.deferUpdate()
     return isNew

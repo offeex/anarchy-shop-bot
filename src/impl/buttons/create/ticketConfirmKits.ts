@@ -2,10 +2,10 @@ import { ButtonBuilder, ButtonStyle, ChannelType, Colors, ComponentType, EmbedBu
 import Button from '../../../structures/Button'
 import { checkPlantingButton, getTicket, ticketFee, ticketStage } from '../../../managers/ticket.manager'
 import { client } from '../../../index'
-import { actionRow, resolveInteraction } from '../../../utils/discord.util'
+import { actionRow, resolveInteractionUpdate } from '../../../utils/discord.util'
 
 export default new Button('ticket-confirm-kits', async interaction => {
-    await resolveInteraction(interaction)
+	await resolveInteractionUpdate(interaction)
 
     const t = await getTicket(interaction)
     const msg = ticketStage(t).create!
@@ -38,7 +38,6 @@ export default new Button('ticket-confirm-kits', async interaction => {
     } else {
         skip = true
         plantButton.setDisabled(true)
-        t.planting = 'plant'
     }
 
     ticketStage(t).planting = await msg.reply({ embeds: [embed], components: [buttonsAr] })

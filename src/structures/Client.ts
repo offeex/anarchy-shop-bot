@@ -20,7 +20,7 @@ export class ExtendedClient extends Client {
 		this.login(process.env.TOKEN).then(() => console.log('Logged in!'))
 
 		await mongoose.connect(process.env.DATABASE_URL!)
-		this.reinit()
+		await this.reinit()
 	}
 
 	public async reinit() {
