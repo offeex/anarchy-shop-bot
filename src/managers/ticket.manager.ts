@@ -49,19 +49,14 @@ export function getTicket(i: Interaction): Ticket {
 export async function loadTickets(guild: Guild) {
 	activeTickets = await TicketModel.find({ category: 'delivery' })
 
-	const chanIds = activeTickets.map(t => t.channelId)
-	const chans = guild.channels.cache.filter(c => chanIds.includes(c.id))
-	if (chans.size < 1) return
-
 	for (const t of activeTickets) {
-		const chan = (chans.find(c => c.id === t.channelId) as TextChannel)
-		const msgs = chan.messages
-
+		// cache warning
+		const chan = (guild.channels.cache.get(t.channelId)) as TextChannel
 		ticketStages.set(t.channelId, {
-			create: await msgs.fetch(t.stages.createId),
-			planting: await msgs.fetch(t.stages.plantingId),
-			spot: await msgs.fetch(t.stages.spotId),
-			payment: await msgs.fetch(t.stages.paymentId)
+			create: await chan.messages.fetch(t.stages.createId),
+			planting: await chan.messages.fetch(t.stages.plantingId),
+			spot: await chan.messages.fetch(t.stages.spotId),
+			payment: await chan.messages.fetch(t.stages.paymentId)
 		})
 	}
 }
