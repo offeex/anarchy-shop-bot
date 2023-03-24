@@ -8,14 +8,15 @@ export default new Button('ticket-confirm-kits', async interaction => {
 	await resolveInteractionUpdate(interaction)
 
     const t = await getTicket(interaction)
-    const msg = ticketStage(t).create!
+    const ts = ticketStage(t)
+    const msg = ts.create
 
     if (await checkPlantingButton(msg, t)) return
 
     // preparing ticket-planting
     const embed = new EmbedBuilder()
       .setTitle('Способ доставки')
-      .setColor(Colors.DarkGold)
+      .setColor('DarkGold')
       .addFields([
           { name: 'Кладом', value: 'Оставим закладку' },
           { name: 'На руки', value: 'Выдадим прямо вам' }
@@ -40,7 +41,7 @@ export default new Button('ticket-confirm-kits', async interaction => {
         plantButton.setDisabled(true)
     }
 
-    ticketStage(t).planting = await msg.reply({ embeds: [embed], components: [buttonsAr] })
+    ts.planting = await msg.reply({ embeds: [embed], components: [buttonsAr] })
 
     if (skip) await client.buttons.get('ticket-planting-plant')!.execute(interaction)
 })

@@ -4,6 +4,7 @@ import {ClientEvents, Collection} from 'discord.js'
 import {Command} from '../structures/Command'
 import Button from '../structures/Button'
 import {ExtendedClient} from '../structures/Client'
+import Modal from "../structures/Modal";
 
 function getFiles(folder: string) {
 	return globSync(`${__dirname}/../impl/${folder}/**/*.ts`)
@@ -35,8 +36,21 @@ function loadButtons(map: Collection<string, Button>) {
     }
 }
 
+// TODO: Merge Buttons and Modals
+function loadModals(map: Collection<string, Modal>) {
+	for (const file of getFiles('modals')) {
+        const modal: Modal = require(file).default
+        if (!modal) continue
+
+        if (Array.isArray(modal.customId))
+            for (const id of modal.customId) map.set(id, modal)
+        else map.set(modal.customId, modal)
+    }
+}
+
 export function load(client: ExtendedClient) {
 	loadEvents(client)
 	loadCommands(client.commands)
 	loadButtons(client.buttons)
+	loadModals(client.modals)
 }

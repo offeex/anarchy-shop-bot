@@ -17,5 +17,10 @@ export default new Event('interactionCreate', async interaction => {
 		const button = client.buttons.get(interaction.customId)
         if (!button) return
 		button.execute(interaction)
+	} else if (interaction.isModalSubmit()) {
+
+		const modal = client.modals.get(interaction.customId)
+				if (!modal) return
+		modal.execute(interaction)
 	}
 })

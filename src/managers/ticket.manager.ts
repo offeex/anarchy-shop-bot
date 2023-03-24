@@ -1,25 +1,31 @@
-import { TicketFees, TicketStages, Vec2 } from '../utils/types.util'
-import { Ticket } from '../models/ticket.model'
+import { Doc, TicketCategoryEntry, TicketFees, TicketStages, Vec2 } from '../utils/types.util'
+import { Ticket, TicketModel } from '../models/ticket.model'
+import { TicketStages as TicketStagez, TicketStagesModel } from '../models/ticketStages.model'
 import {
 	APISelectMenuOption,
 	BaseMessageOptions,
+	ButtonBuilder,
 	ButtonInteraction,
 	ButtonStyle,
 	CategoryChannel,
 	ChannelType,
+	CommandInteraction,
 	ComponentType,
+	EmbedBuilder,
+	Guild,
 	Interaction,
 	Message,
 	StringSelectMenuBuilder,
 	TextBasedChannel,
 	TextChannel
 } from 'discord.js'
-import { parseVec2 } from '../utils/number.util'
+import { clamp, parseVec2 } from '../utils/number.util'
 import { actionRow, toggleComponents } from '../utils/discord.util'
 import { offers } from './offer.manager'
+import { getValue } from '../utils/storage.util'
 
 // Key is a channel id
-export let activeTickets = new Map<string, Ticket>()
+export let activeTickets = new Array<Ticket>()
 export let ticketFees = new Map<string, TicketFees>()
 export let ticketStages = new Map<string, TicketStages>()
 
@@ -38,7 +44,53 @@ export function getTicketContent(t: Ticket): string {
 }
 
 export function getTicket(i: Interaction): Ticket {
-	return activeTickets.get(i.channel!.id)!
+	return activeTickets.find(t => t.channelId === i.channel!.id)!
+}
+
+export async function loadTickets(guild: Guild) {
+	activeTickets = await TicketModel.find({ category: 'delivery' })
+
+	const chanIds = activeTickets.map(t => t.channelId)
+	const chans = guild.channels.cache.filter(c => chanIds.includes(c.id))
+	if (chans.size < 1) return
+
+	const tss = await TicketStagesModel.find() as Doc<TicketStagez>[]
+
+	for (const t of activeTickets) {
+		const chan = (chans.find(c => c.id === t.channelId) as TextChannel)
+		console.log(chan)
+		const msgs = chan.messages
+		const ts = tss.find(e => e.ticket === t.channelId)!
+
+		const create = await msgs.fetch(ts.createId)
+		const planting = await msgs.fetch(ts.plantingId)
+		const spot = await msgs.fetch(ts.spotId)
+		const payment = await msgs.fetch(ts.paymentId)
+		const delivery = await msgs.fetch(ts.deliveryId)
+
+		ticketStages.set(ts.ticket, { create, planting, spot, payment, delivery })
+	}
+}
+
+export async function saveTicket(t: Ticket) {
+	return TicketModel.findOneAndUpdate(
+		{ channelId: t.channelId }, t, { upsert: true, new: true }
+	)
+}
+
+export async function saveTicketStages(channelId: string, ts: TicketStages) {
+	return TicketStagesModel.findOneAndUpdate(
+		{ ticket: channelId },
+		{
+			createId: ts.create.id,
+			plantingId: ts.planting.id,
+			spotId: ts.spot.id,
+			paymentId: ts.payment.id,
+			deliveryId: ts.delivery?.id,
+			reviewId: ts.review?.id,
+		},
+		{ new: true, upsert: true }
+	)
 }
 
 export function createChooseKitMenus(tc: TextBasedChannel, t: Ticket): BaseMessageOptions {
@@ -68,12 +120,7 @@ export function createChooseKitMenus(tc: TextBasedChannel, t: Ticket): BaseMessa
 	}
 }
 
-async function parseCustomKitsAmount(
-	amount: number,
-	chan: TextChannel,
-	content: string,
-	msgTray: Message[]
-): Promise<number> {
+async function parseCustomKitsAmount(amount: number, chan: TextChannel, content: string, msgTray: Message[]): Promise<number> {
 	const msg = await chan.send(content)
 	const res = (await chan.awaitMessages({ max: 1 })).first()!
 	msgTray.push(msg, res)
@@ -90,11 +137,7 @@ async function parseCustomKitsAmount(
 	return amount
 }
 
-export async function parseCustomSpot(
-	chan: TextChannel,
-	content: string,
-	msgTray: Message[]
-): Promise<Vec2> {
+export async function parseCustomSpot(chan: TextChannel, content: string, msgTray: Message[]): Promise<Vec2> {
 	const msg = await chan.send(content)
 	const res = (await chan.awaitMessages({ max: 1 })).first()!
 	msgTray.push(msg, res)
@@ -128,6 +171,7 @@ export async function handleChooseKitMenus(msg: Message, t: Ticket) {
 					'Введите своё количество в чат',
 					[]
 				)
+			amount = clamp(1, amount, 1000000)
 			t.kits.push({ name, amount })
 			name = ''
 			amount = 0
@@ -136,10 +180,7 @@ export async function handleChooseKitMenus(msg: Message, t: Ticket) {
 	})
 }
 
-export async function checkPlantingButton(
-	msg: Message,
-	t: Ticket
-): Promise<boolean> {
+export async function checkPlantingButton(msg: Message, t: Ticket): Promise<boolean> {
 	const msgTray: Message[] = []
 	const chan = msg.channel! as TextChannel
 
@@ -164,4 +205,41 @@ export async function checkTicket(interaction: ButtonInteraction, category: Cate
 	}
 
 	return null
+}
+
+export async function handlePayment(t: Ticket, interaction: CommandInteraction | ButtonInteraction) {
+	t.category = 'delivery'
+	await saveTicket(t)
+
+	const ts = ticketStage(t)
+	await toggleComponents(ts.payment, true)
+
+	const coordsText = `Ожидай заказ на: **${t.spot.x} ${t.spot.z}**\n`
+	let desc = `${coordsText} Мы тебя уведомим по вылету и прибытию\n`
+	const payload: BaseMessageOptions = {}
+	if (t.planting === 'handover') {
+		desc = 'Когда будешь готов получить заказ в руки, жми кнопку\n' + desc
+		const button = new ButtonBuilder()
+			.setCustomId('ticket-delivery-ready')
+			.setLabel('Ожидаю на точке получения')
+			.setStyle(ButtonStyle.Secondary)
+		payload.components = [actionRow(button)]
+	}
+	payload.embeds = [
+		new EmbedBuilder()
+			.setTitle('Оплата прошла успешно')
+			.setDescription(desc)
+			.setColor('Fuchsia')
+			.setFooter({ text: `Айди заказа: ${interaction.channel!.id}` }),
+	]
+
+	ts.delivery = await interaction.editReply(payload)
+	await saveTicketStages(t.channelId, ts)
+
+	await interaction.user.send(payload)
+
+	const chan = (await interaction.channel!) as TextChannel
+	const categories: TicketCategoryEntry[] = await getValue('ticket-categories')
+	await chan.setParent(categories.find(c => c.name === 'доставка')!.channelId)
+	await chan.setRateLimitPerUser(15)
 }

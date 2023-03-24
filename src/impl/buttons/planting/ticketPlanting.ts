@@ -26,7 +26,8 @@ export default new Button(
 		t.planting = isNewInteraction
 			? (interaction.customId.split('-')[2] as PlantingType)
 			: 'plant'
-		const msg = await toggleComponents(ticketStage(t).planting!, true)
+		const ts = ticketStage(t)
+		const msg = await toggleComponents(ts.planting, true)
 
 		const plantingReply = await msg.reply(
 			`Способ доставки выбран: **${t.planting === 'plant' ? 'Кладом' : 'На руки'}**`
@@ -35,7 +36,7 @@ export default new Button(
 		// preparing ticket-spot
 		const embed = new EmbedBuilder()
 			.setTitle('Место назначения')
-			.setColor(Colors.DarkVividPink)
+			.setColor('DarkVividPink')
 			.addFields([
 				{
 					name: 'Выбрать место',
@@ -62,7 +63,7 @@ export default new Button(
 			toggleActionRowBuilder(spotAr, true)
 		} else spotAr.addComponents(generateButton)
 
-		ticketStage(t).spot = await plantingReply.reply({ embeds: [embed], components: [spotAr] })
+		ts.spot = await plantingReply.reply({ embeds: [embed], components: [spotAr] })
 
 		if (t.planting === 'handover')
 			await client.buttons.get('ticket-spot-pick')!.execute(interaction)

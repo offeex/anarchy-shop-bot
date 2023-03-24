@@ -5,11 +5,11 @@ import {
     ButtonInteraction,
     ComponentType,
     Message,
+    AnyComponentBuilder,
     MessageActionRowComponentBuilder,
     TextChannel
 } from 'discord.js'
 import { SendOptions } from './types.util'
-import { getValue, setValue } from './storage.util'
 
 export function getAtm(url: string, name: string) {
 	return new AttachmentBuilder(url, { name })
@@ -20,49 +20,21 @@ export function atmName(ab: AttachmentBuilder) {
 }
 
 export async function sendIfNotExists(
-    msg: SendOptions,
-    msgId: string,
+    payload: SendOptions,
+    msgId: string | undefined,
     chan: TextChannel
 ) {
     if (msgId) {
         try {
             const fetchedMsg = await chan.messages.fetch(msgId)
-            return (await fetchedMsg.edit(msg)).id
+            return (await fetchedMsg.edit(payload)).id
         } catch (e: any) {
-            return (await chan.send(msg)).id
+            return (await chan.send(payload)).id
         }
-    } else return (await chan.send(msg)).id
+    } else return (await chan.send(payload)).id
 }
 
-export async function sendWithEntry(msg: SendOptions, chan: TextChannel) {
-    let msgId = (await getValue('order-instruction-id')) as string
-    msgId = await sendIfNotExists(msg, msgId, chan)
-    await setValue('order-instruction-id', msgId)
-}
-
-// за этот говнокод тож спс тайпскрипту
-
-export async function resolveButtonClick(msg: Message, interaction: ButtonInteraction) {
-    const res = await msg.awaitMessageComponent({
-        filter: i => i.user.id === interaction.user.id,
-        time: 30000,
-        componentType: ComponentType.Button,
-    })
-    res.deferUpdate()
-    return res
-}
-
-export async function resolveSelectMenu(msg: Message, interaction: ButtonInteraction) {
-    const res = await msg.awaitMessageComponent({
-        filter: i => i.user.id === interaction.user.id,
-        time: 30000,
-        componentType: ComponentType.SelectMenu,
-    })
-    res.deferUpdate()
-    return res
-}
-
-export function actionRow<T extends MessageActionRowComponentBuilder>(
+export function actionRow<T extends AnyComponentBuilder>(
     ...builder: T[]
 ): ActionRowBuilder<T> {
     return new ActionRowBuilder<T>().setComponents(builder)

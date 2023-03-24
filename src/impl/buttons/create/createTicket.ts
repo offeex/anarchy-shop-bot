@@ -40,8 +40,9 @@ export default new Button('create-ticket', async interaction => {
 	ticketStages.set(tChannel.id, new TicketStages())
 	ticketFees.set(tChannel.id, new TicketFees())
 
+	const ts = ticketStage(t)
 	setTimeout(() => {
-		if (!ticketStage(t).success) tChannel?.delete()
+		if (!ts.delivery) tChannel?.delete()
 	}, 1000 * 60 * 15)
 
 	const payload = createChooseKitMenus(tChannel, t)
@@ -56,9 +57,9 @@ export default new Button('create-ticket', async interaction => {
 	payload.content = `Привет, выбирай нужны тебе киты, ${interaction.user}`
 	payload.components!.push(actionRow(continueButton, resetKitsButton))
 
-	activeTickets.set(tChannel.id, t)
+	activeTickets.push(t)
 	const msg = await tChannel.send(payload)
-	ticketStage(t).create = msg
+	ts.create = msg
 
 	await handleChooseKitMenus(msg, t)
 })
