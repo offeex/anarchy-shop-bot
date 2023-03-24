@@ -1,6 +1,5 @@
 import { Doc, TicketCategoryEntry, TicketFees, TicketStages, Vec2 } from '../utils/types.util'
-import { Ticket, TicketModel } from '../models/ticket.model'
-import { TicketStages as TicketStagez, TicketStagesModel } from '../models/ticketStages.model'
+import { StagesEntry, Ticket, TicketModel } from '../models/ticket.model'
 import {
 	APISelectMenuOption,
 	BaseMessageOptions,
@@ -54,21 +53,16 @@ export async function loadTickets(guild: Guild) {
 	const chans = guild.channels.cache.filter(c => chanIds.includes(c.id))
 	if (chans.size < 1) return
 
-	const tss = await TicketStagesModel.find() as Doc<TicketStagez>[]
-
 	for (const t of activeTickets) {
 		const chan = (chans.find(c => c.id === t.channelId) as TextChannel)
-		console.log(chan)
 		const msgs = chan.messages
-		const ts = tss.find(e => e.ticket === t.channelId)!
 
-		const create = await msgs.fetch(ts.createId)
-		const planting = await msgs.fetch(ts.plantingId)
-		const spot = await msgs.fetch(ts.spotId)
-		const payment = await msgs.fetch(ts.paymentId)
-		const delivery = await msgs.fetch(ts.deliveryId)
-
-		ticketStages.set(ts.ticket, { create, planting, spot, payment, delivery })
+		ticketStages.set(t.channelId, {
+			create: await msgs.fetch(t.stages.createId),
+			planting: await msgs.fetch(t.stages.plantingId),
+			spot: await msgs.fetch(t.stages.spotId),
+			payment: await msgs.fetch(t.stages.paymentId)
+		})
 	}
 }
 
@@ -78,19 +72,15 @@ export async function saveTicket(t: Ticket) {
 	)
 }
 
-export async function saveTicketStages(channelId: string, ts: TicketStages) {
-	return TicketStagesModel.findOneAndUpdate(
-		{ ticket: channelId },
-		{
-			createId: ts.create.id,
-			plantingId: ts.planting.id,
-			spotId: ts.spot.id,
-			paymentId: ts.payment.id,
-			deliveryId: ts.delivery?.id,
-			reviewId: ts.review?.id,
-		},
-		{ new: true, upsert: true }
-	)
+export function storeStagesInTicket(t: Ticket, ts: TicketStages) {
+	t.stages = {
+		createId: ts.create.id,
+		plantingId: ts.planting.id,
+		spotId: ts.spot.id,
+		paymentId: ts.payment.id,
+		deliveryId: ts.delivery?.id,
+		reviewId: ts.review?.id,
+	}
 }
 
 export function createChooseKitMenus(tc: TextBasedChannel, t: Ticket): BaseMessageOptions {
@@ -209,7 +199,6 @@ export async function checkTicket(interaction: ButtonInteraction, category: Cate
 
 export async function handlePayment(t: Ticket, interaction: CommandInteraction | ButtonInteraction) {
 	t.category = 'delivery'
-	await saveTicket(t)
 
 	const ts = ticketStage(t)
 	await toggleComponents(ts.payment, true)
@@ -234,10 +223,13 @@ export async function handlePayment(t: Ticket, interaction: CommandInteraction |
 	]
 
 	ts.delivery = await interaction.editReply(payload)
-	await saveTicketStages(t.channelId, ts)
+
+	await storeStagesInTicket(t, ts)
+	await saveTicket(t)
 
 	await interaction.user.send(payload)
 
+	// говнокод
 	const chan = (await interaction.channel!) as TextChannel
 	const categories: TicketCategoryEntry[] = await getValue('ticket-categories')
 	await chan.setParent(categories.find(c => c.name === 'доставка')!.channelId)

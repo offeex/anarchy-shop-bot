@@ -15,10 +15,9 @@ export type InstructionEntry = {
 }
 
 export type OrderKitEntry = { name: string; amount: number }
+export type TicketStageName = 'оформление' | 'доставка' | 'выполнено'
 // говнокод
-export type TicketCategory = 'order' | 'delivery' | 'done'
-export type TicketCategoryName = 'оформление' | 'доставка' | 'выполнено'
-export type TicketCategoryEntry = { name: TicketCategoryName; channelId: string }
+export type TicketCategoryEntry = { name: TicketStageName; channelId: string }
 
 export class TicketStages {
 	public create!: Message

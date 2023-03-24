@@ -16,7 +16,7 @@ import {
 	Doc,
 	InstructionEntry,
 	TicketCategoryEntry,
-	TicketCategoryName,
+	TicketStageName,
 } from '../utils/types.util'
 import { createOffers, offers, setupOfferPayload } from './offer.manager'
 import { client } from '../index'
@@ -102,7 +102,7 @@ export async function setupOrdering(guild: Guild) {
 }
 
 export async function setupTicketCategories(guild: Guild) {
-	const categoryNames: TicketCategoryName[] = ['оформление', 'доставка', 'выполнено']
+	const categoryNames: TicketStageName[] = ['оформление', 'доставка', 'выполнено']
 	const categories: TicketCategoryEntry[] = []
 
 	for (const name of categoryNames) {
