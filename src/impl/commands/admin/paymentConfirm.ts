@@ -7,11 +7,10 @@ export default new SlashCommand(
     .setName('payment-confirm')
     .setDescription('Вручную подтверждаем оплату'),
   async interaction => {
-    await interaction.deferReply({ ephemeral: true })
 
     const chan = interaction.channel
     if (!chan || chan.type !== ChannelType.GuildText || chan.parent?.name !== 'оформление') {
-      await interaction.editReply('Чё-то отвалилось!')
+      await interaction.reply({ content: 'Чё-то отвалилось!', ephemeral: true })
 			return
 		}
 

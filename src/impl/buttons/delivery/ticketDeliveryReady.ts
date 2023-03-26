@@ -9,7 +9,13 @@ export default new Button('ticket-delivery-ready', async interaction => {
   await interaction.reply(`Ожидайте на ${coords}, пока курьер прилетит, не выходите из игры!`)
 
   const msg = ticketStage(t).delivery!
+  console.log(Object.keys(ticketStage(t)))
+  console.log(t.stages.deliveryId)
+  console.log(msg)
   await toggleComponents(msg, true)
 
-  await new Promise(() => setTimeout(async () => await toggleComponents(msg, false), 1000 * 10))
+  setTimeout(() =>
+    toggleComponents(msg, false),
+    1000 * 60 * parseInt(process.env.HANDOVER_COOLDOWN ?? '120')
+  )
 })

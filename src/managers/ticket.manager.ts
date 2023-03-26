@@ -51,12 +51,22 @@ export async function loadTickets(guild: Guild) {
 
 	for (const t of activeTickets) {
 		// cache warning
-		const chan = (guild.channels.cache.get(t.channelId)) as TextChannel
+		const chan = guild.channels.cache.get(t.channelId) as TextChannel
+		if (!chan) continue
+
+		const ts = t.stages
+		const ms = chan.messages
+
+		const delivery = ts.deliveryId ? await ms.fetch(ts.deliveryId) : undefined
+		const review = ts.reviewId ? await ms.fetch(ts.reviewId) : undefined
+
 		ticketStages.set(t.channelId, {
-			create: await chan.messages.fetch(t.stages.createId),
-			planting: await chan.messages.fetch(t.stages.plantingId),
-			spot: await chan.messages.fetch(t.stages.spotId),
-			payment: await chan.messages.fetch(t.stages.paymentId)
+			create: await ms.fetch(ts.createId),
+			planting: await ms.fetch(ts.plantingId),
+			spot: await ms.fetch(ts.spotId),
+			payment: await ms.fetch(ts.paymentId),
+			delivery,
+			review
 		})
 	}
 }
@@ -201,6 +211,7 @@ export async function handlePayment(t: Ticket, interaction: CommandInteraction |
 	const coordsText = `Ожидай заказ на: **${t.spot.x} ${t.spot.z}**\n`
 	let desc = `${coordsText} Мы тебя уведомим по вылету и прибытию\n`
 	const payload: BaseMessageOptions = {}
+
 	if (t.planting === 'handover') {
 		desc = 'Когда будешь готов получить заказ в руки, жми кнопку\n' + desc
 		const button = new ButtonBuilder()
@@ -209,6 +220,7 @@ export async function handlePayment(t: Ticket, interaction: CommandInteraction |
 			.setStyle(ButtonStyle.Secondary)
 		payload.components = [actionRow(button)]
 	}
+
 	payload.embeds = [
 		new EmbedBuilder()
 			.setTitle('Оплата прошла успешно')
@@ -217,11 +229,12 @@ export async function handlePayment(t: Ticket, interaction: CommandInteraction |
 			.setFooter({ text: `Айди заказа: ${interaction.channel!.id}` }),
 	]
 
-	ts.delivery = await interaction.editReply(payload)
+	ts.delivery = await (await interaction.reply(payload)).fetch()
 
 	await storeStagesInTicket(t, ts)
 	await saveTicket(t)
 
+	payload.components = []
 	await interaction.user.send(payload)
 
 	// говнокод

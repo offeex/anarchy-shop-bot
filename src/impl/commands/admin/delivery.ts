@@ -6,7 +6,6 @@ import {
 	TextChannel,
 } from 'discord.js'
 import { SlashCommand } from '../../../structures/command/SlashCommand'
-import { TicketModel } from '../../../models/ticket.model'
 import { getValue } from '../../../utils/storage.util'
 import { TicketCategoryEntry } from '../../../utils/types.util'
 import { actionRow } from '../../../utils/discord.util'
@@ -32,6 +31,9 @@ export default new SlashCommand(
 
 		const stage = interaction.options.getString('stage') as 'start' | 'end'
 		let embed: EmbedBuilder = new EmbedBuilder()
+
+		if (t.category === 'done')
+			return interaction.reply({ content: 'Заказ уже завершен', ephemeral: true })
 
 		if (stage === 'start') {
 			const coords = `**${t.spot.x} ${t.spot.z}**`
@@ -68,11 +70,9 @@ export default new SlashCommand(
 				category.find(c => c.name === 'выполнено')!.channelId
 			)
 
-			await new Promise(() =>
-				setTimeout(() => {
+			setTimeout(() => {
 					interaction.channel!.delete()
-				}, 1000 * 60 * 30)
-			)
+				}, 1000 * parseInt(process.env.DONE_STAGE_TIMEOUT ?? '60'))
 		}
 	}
 )

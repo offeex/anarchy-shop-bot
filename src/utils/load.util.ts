@@ -18,6 +18,7 @@ function loadEvents(client: ExtendedClient) {
 }
 
 function loadCommands(map: Collection<string, Command>) {
+	console.log(getFiles('commands'))
 	for (const file of getFiles('commands')) {
 		const command: Command = require(file).default
 		if (!command) continue

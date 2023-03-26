@@ -19,7 +19,7 @@ export class Ticket {
 	@prop({ default: 'plant' }) public planting!: PlantingType
 	@prop() public spot!: Vec2
 	@prop({ default: 0 }) public totalPrice!: number
-	@prop({ default: 'order' }) public category!: Stage
+	@prop({ default: 'order' }) public category: Stage = 'order'
 	@prop() public stages!: StagesEntry
 }
 

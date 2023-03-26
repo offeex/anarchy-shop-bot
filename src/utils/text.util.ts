@@ -1,4 +1,4 @@
-import {OrderKitEntry} from './types.util'
+import { OrderKitEntry, TicketFees } from './types.util'
 
 export function orderedText(kits: OrderKitEntry[]) {
     let text = ''
@@ -6,11 +6,11 @@ export function orderedText(kits: OrderKitEntry[]) {
     return text
 }
 
-export function paymentText(productsPrice: number, plantingFee: number, spotFee: number) {
+export function paymentText(productsPrice: number, tf: TicketFees) {
     let text = ''
     text += `> Товары: **${productsPrice} RUB**\n`
-    if (plantingFee) text += `> Доставка на руки: **${plantingFee} RUB**\n`
-    if (spotFee) text += `> Расстояние доставки: **${spotFee} RUB**\n`
-    text += `__Итого__: **${productsPrice + plantingFee + spotFee} RUB**\n`
+    if (tf.planting) text += `> Доставка на руки: **${tf.planting} RUB**\n`
+    if (tf.spot) text += `> Расстояние доставки: **${tf.spot} RUB**\n`
+    text += `__Итого__: **${productsPrice + tf.planting + tf.spot} RUB**\n`
     return text
 }

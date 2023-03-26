@@ -42,8 +42,20 @@ export default new Button('create-ticket', async interaction => {
 
 	const ts = ticketStage(t)
 	setTimeout(() => {
-		if (!ts.delivery) tChannel?.delete()
-	}, 1000 * 60 * 15)
+		if (t.category === 'order') {
+			ticketStages.delete(t.channelId)
+			ticketFees.delete(t.channelId)
+
+			const index = activeTickets.indexOf(t)
+			if (index > -1) {
+				activeTickets.length = 0
+				activeTickets.push(...activeTickets.splice(index, 1))
+			}
+
+			tChannel?.delete()
+			interaction.user.send('Время оформления заказа истекло, тикет закрыт')
+		}
+	}, 1000 * parseInt(process.env.OFFER_STAGE_TIMEOUT ?? '60'))
 
 	const payload = createChooseKitMenus(tChannel, t)
 	const continueButton = new ButtonBuilder()
