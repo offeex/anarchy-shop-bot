@@ -43,7 +43,6 @@ export async function setupAssortment(guild: Guild) {
 	offers.push(...(await OfferModel.find({ inStock: true }) as Doc<Offer>[]))
 	const assortmentChannels = new Set(offers.map(o => o.category))
 
-	console.log('Offers: ', offers.map(o => o.name + " " + o.category))
 	console.log('all text channels: ')
 	console.log(category.children.cache.map(c => c.name))
 	// Creating assortment channels if they don't exist

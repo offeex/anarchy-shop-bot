@@ -1,4 +1,12 @@
-import { ButtonBuilder, ButtonStyle, CategoryChannel, ChannelType, ComponentType, DiscordjsError } from 'discord.js'
+import {
+	ButtonBuilder,
+	ButtonStyle,
+	CategoryChannel,
+	ChannelType,
+	ComponentType,
+	DiscordjsError,
+	OverwriteType
+} from 'discord.js'
 import Button from '../../../structures/Button'
 import { getValue } from '../../../utils/storage.util'
 import { client } from '../../../index'
@@ -27,8 +35,13 @@ export default new Button('create-ticket', async interaction => {
 	tChannel = await category.children.create({
 		name: `ticket-${interaction.user.username}`,
 		type: ChannelType.GuildText,
-		topic: interaction.user.id
+		topic: interaction.user.id,
 	})
+	await tChannel.permissionOverwrites.create(
+		interaction.user,
+		{ ViewChannel: true }
+	)
+
 	await interaction.reply({
 		content: `Тикет успешно открыт: ${tChannel}`,
 		ephemeral: true
