@@ -16,10 +16,11 @@ import {
 	Doc,
 	InstructionEntry,
 	TicketCategoryEntry,
-	TicketStageName,
+	TicketStageName
 } from '../utils/types.util'
 import { createOffers, offers, setupOfferPayload } from './offer.manager'
 import { client } from '../index'
+import { AssortmentChannel, AssortmentChannelModel } from '../models/assortmentChannel.model'
 
 export let instructionEntries: InstructionEntry[] = []
 
@@ -41,22 +42,42 @@ export async function setupAssortment(guild: Guild) {
 
 	offers.length = 0
 	offers.push(...(await OfferModel.find({ inStock: true }) as Doc<Offer>[]))
-	const assortmentChannels = new Set(offers.map(o => o.category))
+	const assortChanNames = new Set(offers.map(o => o.category)) // unique assortment category names
+	const assortChanEntries: Doc<AssortmentChannel>[] = await AssortmentChannelModel.find()
 
-	console.log('all text channels: ')
-	console.log(category.children.cache.map(c => c.name))
 	// Creating assortment channels if they don't exist
-	let channels: TextChannel[] = []
-	for (const c of assortmentChannels)
-		if (!category.children.cache.find(chan => chan.name === c))
-			channels.push(await category.children.create({ name: c, type: ChannelType.GuildText }))
+	for (const name of assortChanNames) {
+		let chan: TextChannel
 
-	console.log('Channels created: ', channels.map(c => c.name))
-	// Building and sending embeds
-	for (const o of offers) {
-		const channel = channels.find(chan => chan.name === o.category)
-		if (!channel) continue
-		await channel.send(setupOfferPayload(o))
+		try {
+			const entry = assortChanEntries.find(ac => ac.name === name)
+			if (!entry) throw new Error('Assortment channel entry is not found')
+
+			const c = await guild.channels.fetch(entry.channelId) // error, if ID is real, but channel is not
+			if (!c || c.type !== ChannelType.GuildText || !c.parent || c.parent.id !== category.id)
+				throw new Error('Channel is not found') // double-check y'k
+			chan = c
+
+		} catch (err) {
+			console.error("Entry is not found / channel does not exist, creating channel...")
+			chan = await category.children.create({
+				name,
+				type: ChannelType.GuildText,
+				permissionOverwrites: [{ id: guild.roles.everyone, deny: ['ViewChannel'] }]
+			}) // we create it anyways
+			await AssortmentChannelModel.updateOne(
+				{ name },
+				{ name, channelId: chan.id, },
+				{ upsert: true }
+			)
+
+			const ofs = offers.filter(o => o.category === name) // why i'm even supposed to do this
+			if (!ofs) throw new Error('How the fuck this error arised')
+			for (const o of ofs) {
+				await chan.send(setupOfferPayload(o))
+			}
+
+		}
 	}
 }
 
