@@ -9,8 +9,12 @@ export function orderedText(kits: OrderKitEntry[]) {
 export function paymentText(productsPrice: number, tf: TicketFees) {
     let text = ''
     text += `> Товары: **${productsPrice} RUB**\n`
-    if (tf.planting) text += `> Доставка на руки: **${tf.planting} RUB**\n`
-    if (tf.spot) text += `> Расстояние доставки: **${tf.spot} RUB**\n`
-    text += `__Итого__: **${productsPrice + tf.planting + tf.spot} RUB**\n`
+
+    const planting = Math.round(tf.planting)
+    const spot = Math.round(tf.spot)
+
+    if (tf.planting) text += `> Доставка на руки: **${planting} RUB**\n`
+    if (tf.spot) text += `> Расстояние доставки: **${spot} RUB**\n`
+    text += `__Итого__: **${productsPrice + planting + spot} RUB**\n`
     return text
 }

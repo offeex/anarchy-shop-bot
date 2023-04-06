@@ -54,7 +54,8 @@ export default new Button(['ticket-spot-pick', 'ticket-spot-generate'], async in
 	const productsPrice = t.kits
 		.map(kit => kit.amount * offers.find(o => o.name === kit.name)!.price)
 		.reduce((a, b) => a + b)
-	tf.planting = Math.round(productsPrice * parseFloat(process.env.PLANTING_FEE ?? '0.125'))
+	if (t.planting === 'handover' && tf.totalAmount < 27)
+		tf.planting = Math.round(productsPrice * parseFloat(process.env.PLANTING_FEE ?? '0.2'))
 	t.totalPrice = productsPrice + tf.planting + tf.spot
 
 	const orderText = orderedText(t.kits)

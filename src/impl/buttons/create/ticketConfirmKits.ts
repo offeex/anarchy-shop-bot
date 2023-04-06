@@ -32,11 +32,10 @@ export default new Button('ticket-confirm-kits', async interaction => {
     const buttonsAr = actionRow(plantButton)
 
     let skip = false
-    let totalAmount = t.kits.map(k => k.amount).reduce((a, b) => a + b)
-    if (totalAmount < 27) {
-        buttonsAr.addComponents(handoverButton)
-        ticketFee(t).totalAmount = totalAmount
-    } else {
+    const tf = ticketFee(t)
+    tf.totalAmount = t.kits.map(k => k.amount).reduce((a, b) => a + b)
+    if (tf.totalAmount < 27) buttonsAr.addComponents(handoverButton)
+    else {
         skip = true
         plantButton.setDisabled(true)
     }

@@ -52,7 +52,11 @@ export default new Button('create-ticket', async interaction => {
 				activeTickets.push(...activeTickets.splice(index, 1))
 			}
 
-			tChannel?.delete()
+			try {
+				tChannel?.delete()
+			} catch (_) {
+
+			}
 			interaction.user.send('Время оформления заказа истекло, тикет закрыт')
 		}
 	}, 1000 * parseInt(process.env.OFFER_STAGE_TIMEOUT ?? '60'))
