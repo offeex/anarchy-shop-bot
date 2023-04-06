@@ -1,11 +1,12 @@
 import { SlashCommand } from '../../../structures/command/SlashCommand'
-import { ChannelType, SlashCommandBuilder } from 'discord.js'
+import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 import { getTicket, handlePayment } from '../../../managers/ticket.manager'
 
 export default new SlashCommand(
   new SlashCommandBuilder()
     .setName('payment-confirm')
-    .setDescription('Вручную подтверждаем оплату'),
+    .setDescription('Вручную подтверждаем оплату')
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
   async interaction => {
 
     const chan = interaction.channel

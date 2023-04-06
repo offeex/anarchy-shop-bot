@@ -240,6 +240,8 @@ export async function handlePayment(t: Ticket, interaction: CommandInteraction |
 	// говнокод
 	const chan = (await interaction.channel!) as TextChannel
 	const categories: TicketCategoryEntry[] = await getValue('ticket-categories')
-	await chan.setParent(categories.find(c => c.name === 'доставка')!.channelId)
+	await chan.setParent(
+		categories.find(c => c.name === 'доставка')!.channelId, { lockPermissions: false }
+	)
 	await chan.setRateLimitPerUser(15)
 }

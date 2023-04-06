@@ -4,6 +4,7 @@ import { toggleComponents } from '../../../utils/discord.util'
 
 export default new Button('ticket-delivery-ready', async interaction => {
   const t = getTicket(interaction)
+  if (!t) return interaction.deferUpdate()
 
   const coords = `**${t.spot.x} ${t.spot.z}**`
   await interaction.reply(`Ожидайте на ${coords}, пока курьер прилетит, не выходите из игры!`)

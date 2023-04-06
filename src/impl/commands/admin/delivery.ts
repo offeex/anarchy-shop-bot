@@ -1,4 +1,12 @@
-import { ButtonBuilder, ButtonStyle, DiscordjsError, EmbedBuilder, SlashCommandBuilder, TextChannel } from 'discord.js'
+import {
+	ButtonBuilder,
+	ButtonStyle,
+	DiscordjsError,
+	EmbedBuilder,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	TextChannel,
+} from 'discord.js'
 import { SlashCommand } from '../../../structures/command/SlashCommand'
 import { getValue } from '../../../utils/storage.util'
 import { TicketCategoryEntry } from '../../../utils/types.util'
@@ -14,7 +22,7 @@ export default new SlashCommand(
 			.setDescription('Stage of delivery')
 			.setRequired(true)
 			.setChoices({ name: 'start', value: 'start' }, { name: 'end', value: 'end' })
-		),
+		).setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	async interaction => {
 		const t = getTicket(interaction)
 		if (!t)
@@ -60,8 +68,9 @@ export default new SlashCommand(
 			await saveTicket(t)
 
 			const category = (await getValue('ticket-categories')) as TicketCategoryEntry[]
-			await (interaction.channel as TextChannel).setParent(
-				category.find(c => c.name === 'выполнено')!.channelId
+			const chan = interaction.channel as TextChannel
+			await chan.setParent(
+				category.find(c => c.name === 'выполнено')!.channelId, { lockPermissions: false }
 			)
 
 			setTimeout(() => {

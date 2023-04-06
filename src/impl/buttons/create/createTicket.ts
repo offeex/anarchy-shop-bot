@@ -39,7 +39,7 @@ export default new Button('create-ticket', async interaction => {
 	})
 	await tChannel.permissionOverwrites.create(
 		interaction.user,
-		{ ViewChannel: true }
+		{ ViewChannel: true, SendMessages: true, ReadMessageHistory: true },
 	)
 
 	await interaction.reply({
