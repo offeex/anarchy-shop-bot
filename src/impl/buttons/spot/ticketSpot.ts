@@ -64,7 +64,11 @@ export default new Button(['ticket-spot-pick', 'ticket-spot-generate'], async in
 
 	const embed = new EmbedBuilder()
 		.setTitle('Оплата')
-		.setDescription('Автоматически проверяется, и в случае успеха тебя уведомят')
+		.setDescription(
+			':flag_ru: Qiwi: по нику **nullemo**\n' +
+			':flag_ru: Tinkoff карта: **5536913963113333**\n' +
+			':flag_ua: Monobank карта: **4441114449593738**'
+		)
 		.setColor('Blurple')
 		.addFields([
 			{ name: 'Заказ:', value: orderText },

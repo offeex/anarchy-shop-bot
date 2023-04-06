@@ -4,10 +4,10 @@ import {
 	ButtonStyle,
 	CategoryChannel,
 	ChannelType,
-	Colors,
+	Colors, DiscordjsError,
 	EmbedBuilder,
 	Guild,
-	TextChannel,
+	TextChannel
 } from 'discord.js'
 import { getValue, setIfNotExists, setValue } from '../utils/storage.util'
 import { actionRow, sendIfNotExists } from '../utils/discord.util'
@@ -126,6 +126,8 @@ export async function invalidateTickets(guild: Guild) {
 			chan.topic!,
 			'Данные стали невалидны из-за перезагрузки бота, открой тикет заново'
 		)
-		await chan.delete('fuck')
+		await chan.delete('fuck').catch((err: DiscordjsError) => {
+			console.error("Ticket invalidation moment: ", err.message)
+		})
 	}
 }

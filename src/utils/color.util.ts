@@ -22,5 +22,5 @@ export function getHexColor(c: Color): any {
 }
 
 export function getShulkerIcon(c: Color): string {
-	return globSync(`${__dirname}/../static/${c}.png`)[0]
+	return globSync(`${process.cwd()}/static/${c}.png`)[0]
 }

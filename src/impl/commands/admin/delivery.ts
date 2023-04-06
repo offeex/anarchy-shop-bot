@@ -1,10 +1,4 @@
-import {
-	ButtonBuilder,
-	ButtonStyle,
-	EmbedBuilder,
-	SlashCommandBuilder,
-	TextChannel,
-} from 'discord.js'
+import { ButtonBuilder, ButtonStyle, DiscordjsError, EmbedBuilder, SlashCommandBuilder, TextChannel } from 'discord.js'
 import { SlashCommand } from '../../../structures/command/SlashCommand'
 import { getValue } from '../../../utils/storage.util'
 import { TicketCategoryEntry } from '../../../utils/types.util'
@@ -16,17 +10,17 @@ export default new SlashCommand(
 		.setName('delivery')
 		.setDescription('Marks delivery process as started')
 		.addStringOption(o => o
-				.setName('stage')
-				.setDescription('Stage of delivery')
-				.setRequired(true)
-				.setChoices({ name: 'start', value: 'start' }, { name: 'end', value: 'end' })
+			.setName('stage')
+			.setDescription('Stage of delivery')
+			.setRequired(true)
+			.setChoices({ name: 'start', value: 'start' }, { name: 'end', value: 'end' })
 		),
 	async interaction => {
 		const t = getTicket(interaction)
 		if (!t)
 			return interaction.reply({
 				content: 'Тикет не найден или канал иссуе',
-				ephemeral: true,
+				ephemeral: true
 			})
 
 		const stage = interaction.options.getString('stage') as 'start' | 'end'
@@ -58,7 +52,7 @@ export default new SlashCommand(
 			ts.review = await (
 				await interaction.reply({
 					embeds: [embed],
-					components: [actionRow(reviewButton)],
+					components: [actionRow(reviewButton)]
 				})
 			).fetch()
 
@@ -71,8 +65,10 @@ export default new SlashCommand(
 			)
 
 			setTimeout(() => {
-					interaction.channel!.delete()
-				}, 1000 * parseInt(process.env.DONE_STAGE_TIMEOUT ?? '60'))
+				interaction.channel!.delete().catch((err: DiscordjsError) => {
+					console.error('Processed ticket deletion error: ', err.message)
+				})
+			}, 1000 * parseInt(process.env.DONE_STAGE_TIMEOUT ?? '60'))
 		}
 	}
 )

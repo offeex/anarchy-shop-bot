@@ -7,7 +7,7 @@ import {ExtendedClient} from '../structures/Client'
 import Modal from "../structures/Modal";
 
 function getFiles(folder: string) {
-	return globSync(`${__dirname}/../impl/${folder}/**/*.ts`)
+	return globSync(`${__dirname}/../impl/${folder}/**/*.{js,ts}`)
 }
 
 function loadEvents(client: ExtendedClient) {

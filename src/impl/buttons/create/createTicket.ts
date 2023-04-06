@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonStyle, CategoryChannel, ChannelType, ComponentType } from 'discord.js'
+import { ButtonBuilder, ButtonStyle, CategoryChannel, ChannelType, ComponentType, DiscordjsError } from 'discord.js'
 import Button from '../../../structures/Button'
 import { getValue } from '../../../utils/storage.util'
 import { client } from '../../../index'
@@ -52,11 +52,9 @@ export default new Button('create-ticket', async interaction => {
 				activeTickets.push(...activeTickets.splice(index, 1))
 			}
 
-			try {
-				tChannel?.delete()
-			} catch (_) {
-
-			}
+			tChannel?.delete().catch((err: DiscordjsError) => {
+				console.error("Unpaid ticket deletion error: ", err.message)
+			})
 			interaction.user.send('Время оформления заказа истекло, тикет закрыт')
 		}
 	}, 1000 * parseInt(process.env.OFFER_STAGE_TIMEOUT ?? '60'))
