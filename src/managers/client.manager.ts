@@ -30,7 +30,9 @@ async function updateInstructions() {
 async function setupAssortmentCategory(guild: Guild): Promise<CategoryChannel> {
 	const categoryChannelId = process.env.ASSORTMENT_CATEGORY_ID
 	if (!categoryChannelId) throw new Error('Assortment category ID is not set')
-	return (await guild.channels.fetch(categoryChannelId)) as CategoryChannel
+	const chan = await guild.channels.fetch(categoryChannelId)
+	if (!chan) throw new Error('Assortment category is not found')
+	return chan as CategoryChannel
 }
 
 export async function setupAssortment(guild: Guild) {
@@ -45,9 +47,7 @@ export async function setupAssortment(guild: Guild) {
 	let channels: TextChannel[] = []
 	for (const c of assortmentChannels)
 		if (!category.children.cache.find(chan => chan.name === c))
-			channels.push(await category.children.create({
-				name: c, type: ChannelType.GuildText
-			}))
+			channels.push(await category.children.create({ name: c, type: ChannelType.GuildText }))
 
 	// Building and sending embeds
 	for (const o of offers) {
