@@ -59,8 +59,8 @@ export async function setupAssortment(guild: Guild) {
 
 export async function setupInstructions() {
 	const template: InstructionEntry[] = [
-		{ name: 'order', value: 'T' },
-		{ name: 'delivery', value: 'T' }
+		{ name: 'order', value: 'Troll moment, no instruction!' },
+		{ name: 'delivery', value: 'Delivery instruction is fuckin missin\'' }
 	]
 	await setIfNotExists('instructions', template)
 	instructionEntries = (await getValue('instructions')) as InstructionEntry[]
@@ -92,7 +92,7 @@ function setupOrderPayload(content: string): BaseMessageOptions {
 export async function setupOrdering(guild: Guild) {
 	const chan = await setupOrderChannel(guild)
 	const entry = instructionEntries.find(i => i.name === 'order')
-	if (entry === undefined) throw new Error('Order instruction entry is not found')
+	if (!entry) throw new Error('Order instruction entry is not found')
 
 	const payload = setupOrderPayload(entry.value)
 

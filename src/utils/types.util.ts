@@ -1,6 +1,6 @@
-import { DocumentType } from '@typegoose/typegoose'
 import { HydratedDocument } from 'mongoose'
 import { BaseMessageOptions, Message, MessagePayload } from 'discord.js'
+import { DocumentType } from '@typegoose/typegoose'
 
 export type Doc<T> = HydratedDocument<DocumentType<T>>
 
