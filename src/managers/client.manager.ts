@@ -43,12 +43,15 @@ export async function setupAssortment(guild: Guild) {
 	offers.push(...(await OfferModel.find({ inStock: true }) as Doc<Offer>[]))
 	const assortmentChannels = new Set(offers.map(o => o.category))
 
+	console.log('Offers: ', offers)
+	console.log('all text channels: ', Array.of(category.children.cache.values()))
 	// Creating assortment channels if they don't exist
 	let channels: TextChannel[] = []
 	for (const c of assortmentChannels)
 		if (!category.children.cache.find(chan => chan.name === c))
 			channels.push(await category.children.create({ name: c, type: ChannelType.GuildText }))
 
+	console.log('Channels created: ', channels)
 	// Building and sending embeds
 	for (const o of offers) {
 		const channel = channels.find(chan => chan.name === o.category)
