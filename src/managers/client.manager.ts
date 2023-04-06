@@ -43,15 +43,16 @@ export async function setupAssortment(guild: Guild) {
 	offers.push(...(await OfferModel.find({ inStock: true }) as Doc<Offer>[]))
 	const assortmentChannels = new Set(offers.map(o => o.category))
 
-	console.log('Offers: ', offers)
-	console.log('all text channels: ', Array.of(category.children.cache.values()))
+	console.log('Offers: ', offers.map(o => o.name + " " + o.category))
+	console.log('all text channels: ')
+	console.log(category.children.cache.map(c => c.name))
 	// Creating assortment channels if they don't exist
 	let channels: TextChannel[] = []
 	for (const c of assortmentChannels)
 		if (!category.children.cache.find(chan => chan.name === c))
 			channels.push(await category.children.create({ name: c, type: ChannelType.GuildText }))
 
-	console.log('Channels created: ', channels)
+	console.log('Channels created: ', channels.map(c => c.name))
 	// Building and sending embeds
 	for (const o of offers) {
 		const channel = channels.find(chan => chan.name === o.category)
@@ -73,7 +74,11 @@ async function setupOrderChannel(guild: Guild): Promise<TextChannel> {
 	const channelId = await process.env.ORDER_CHANNEL_ID
 	if (!channelId) throw new Error('Order channel is not set up')
 
-	const channel = await guild.channels.fetch(channelId) as TextChannel
+	const channel = await guild.channels.fetch(channelId).catch((err: DiscordjsError) => {
+		throw new Error("Invalid order channel ID: ", err)
+	})
+	if (!channel) throw new Error()
+
 	if (channel.type !== ChannelType.GuildText)
 		throw new Error('Order channel is not a text channel, it\'s type is: ' + channel.type)
 	return channel
