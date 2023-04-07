@@ -33,6 +33,7 @@ export default new Button(['ticket-spot-pick', 'ticket-spot-generate'], async in
 	const msg = ts.spot
 	let spotType = isInteractionNew ? (interaction.customId.split('-')[2] as SpotType) : 'pick'
 
+	if (!msg) return await interaction.reply('Как так нахер вышло?')
 	await toggleComponents(msg, true)
 
 	const tf = ticketFee(t)
@@ -60,7 +61,7 @@ export default new Button(['ticket-spot-pick', 'ticket-spot-generate'], async in
 
 	const orderText = orderedText(t.kits)
 	const payText = paymentText(productsPrice, tf)
-	const footerText = 'Расстояние: 4к = 5 RUB\n' + 'Доставка на руки: 20% от цены'
+	const footerText = 'По нажатию на кнопку, вы **НЕ СМОЖЕТЕ** создать новый тикет ранее чем через 24 часа'
 
 	const embed = new EmbedBuilder()
 		.setTitle('Оплата')
@@ -83,24 +84,4 @@ export default new Button(['ticket-spot-pick', 'ticket-spot-generate'], async in
 	const ar = actionRow(payButton)
 
 	ts.payment = await spotReply.reply({ embeds: [embed], components: [ar] })
-	let paymentInteraction = await ts.payment
-		.awaitMessageComponent({
-			filter: i => i.user.id === interaction.user.id,
-			componentType: ComponentType.Button,
-		})
-		.catch((reason: DiscordjsError) => {
-			if (reason.code === 'InteractionCollectorError') return
-		})
-	if (!paymentInteraction) return
-
-	// for manual payment check
-	ts.payment = await toggleComponents(ts.payment, true)
-	await paymentInteraction.reply(
-		'На данный момент оплата проверяется вручную.\n' +
-		'Мы тебя уведомим, когда оплата будет проверена'
-	)
-	for (const s of destr(process.env.SELLERS_IDS) as string[]) {
-		const msg = `Заказчик предположил оплату: ${interaction.channel}`
-		await client.users.send(s, msg)
-	}
 })

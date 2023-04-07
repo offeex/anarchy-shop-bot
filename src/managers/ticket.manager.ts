@@ -59,15 +59,7 @@ export async function loadTickets(guild: Guild) {
 
 		const delivery = ts.deliveryId ? await ms.fetch(ts.deliveryId) : undefined
 		const review = ts.reviewId ? await ms.fetch(ts.reviewId) : undefined
-
-		ticketStages.set(t.channelId, {
-			create: await ms.fetch(ts.createId),
-			planting: await ms.fetch(ts.plantingId),
-			spot: await ms.fetch(ts.spotId),
-			payment: await ms.fetch(ts.paymentId),
-			delivery,
-			review
-		})
+		ticketStages.set(t.channelId, { delivery, review })
 	}
 }
 
@@ -79,10 +71,6 @@ export async function saveTicket(t: Ticket) {
 
 export function storeStagesInTicket(t: Ticket, ts: TicketStages) {
 	t.stages = {
-		createId: ts.create.id,
-		plantingId: ts.planting.id,
-		spotId: ts.spot.id,
-		paymentId: ts.payment.id,
 		deliveryId: ts.delivery?.id,
 		reviewId: ts.review?.id,
 	}
@@ -120,14 +108,12 @@ async function parseCustomKitsAmount(amount: number, chan: TextChannel, content:
 	const res = (await chan.awaitMessages({ max: 1 })).first()!
 	msgTray.push(msg, res)
 	amount = parseInt(res.content as string)
-	if (isNaN(amount)) {
-		return await parseCustomKitsAmount(
+	if (isNaN(amount)) return await parseCustomKitsAmount(
 			amount,
 			chan,
 			'Неверное количество, введи число',
 			msgTray
 		)
-	}
 	await chan.bulkDelete(msgTray)
 	return amount
 }
@@ -204,8 +190,13 @@ export async function checkTicket(interaction: ButtonInteraction, category: Cate
 
 export async function handlePayment(t: Ticket, interaction: CommandInteraction | ButtonInteraction) {
 	t.category = 'delivery'
-
 	const ts = ticketStage(t)
+
+	if (!ts.payment) {
+		await interaction.reply({ content: 'Хочешь анекдот? не найден этап оплаты', ephemeral: true })
+		return
+	}
+
 	await toggleComponents(ts.payment, true)
 
 	const coordsText = `Ожидай заказ на: **${t.spot.x} ${t.spot.z}**\n`

@@ -20,10 +20,11 @@ export type TicketStageName = 'оформление' | 'доставка' | 'в�
 export type TicketCategoryEntry = { name: TicketStageName; channelId: string }
 
 export class TicketStages {
-	public create!: Message
-	public planting!: Message
-	public spot!: Message
-	public payment!: Message
+	public create?: Message
+	public planting?: Message
+	public spot?: Message
+	public payment?: Message
+	public assertion?: Message
 	public delivery?: Message
 	public review?: Message
 }

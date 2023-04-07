@@ -27,6 +27,8 @@ export default new Button(
 			? (interaction.customId.split('-')[2] as PlantingType)
 			: 'plant'
 		const ts = ticketStage(t)
+
+		if (!ts.planting) return interaction.channel!!.send('Ну всё ребятки всем спасбио за просмотр')
 		const msg = await toggleComponents(ts.planting, true)
 
 		const plantingReply = await msg.reply(

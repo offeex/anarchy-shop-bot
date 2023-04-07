@@ -11,6 +11,7 @@ export default new Button('ticket-confirm-kits', async interaction => {
     const ts = ticketStage(t)
     const msg = ts.create
 
+    if (!msg) return interaction.reply('Да как так нахер :(')
     if (await checkPlantingButton(msg, t)) return
 
     // preparing ticket-planting

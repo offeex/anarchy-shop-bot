@@ -54,7 +54,8 @@ export default new Button('create-ticket', async interaction => {
 	ticketFees.set(tChannel.id, new TicketFees())
 
 	const ts = ticketStage(t)
-	setTimeout(() => {
+
+	function clearTicket() {
 		if (t.category === 'order') {
 			ticketStages.delete(t.channelId)
 			ticketFees.delete(t.channelId)
@@ -70,6 +71,13 @@ export default new Button('create-ticket', async interaction => {
 			})
 			interaction.user.send('Время оформления заказа истекло, тикет закрыт')
 		}
+	}
+
+	setTimeout(() => {
+		if (!ts.assertion) clearTicket()
+		else setTimeout(() => clearTicket(),
+			1000 * parseInt(process.env.ASSERTION_STAGE_TIMEOUT ?? '60')
+		)
 	}, 1000 * parseInt(process.env.OFFER_STAGE_TIMEOUT ?? '60'))
 
 	const payload = createChooseKitMenus(tChannel, t)

@@ -4,10 +4,6 @@ import { OrderKitEntry, PlantingType, Vec2 } from '../utils/types.util'
 type Stage = 'order' | 'delivery' | 'done'
 
 export class StagesEntry {
-	@prop() public createId!: string
-	@prop() public plantingId!: string
-	@prop() public spotId!: string
-	@prop() public paymentId!: string
 	@prop() public deliveryId?: string
 	@prop() public reviewId?: string
 }
