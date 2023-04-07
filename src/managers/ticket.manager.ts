@@ -9,9 +9,9 @@ import {
 	CategoryChannel,
 	ChannelType,
 	CommandInteraction,
-	ComponentType,
+	ComponentType, DiscordjsError,
 	EmbedBuilder,
-	Guild,
+	Guild, GuildMemberRoleManager,
 	Interaction,
 	Message,
 	StringSelectMenuBuilder,
@@ -235,4 +235,14 @@ export async function handlePayment(t: Ticket, interaction: CommandInteraction |
 		categories.find(c => c.name === 'доставка')!.channelId, { lockPermissions: false }
 	)
 	await chan.setRateLimitPerUser(15)
+
+	try {
+		const role = await interaction.guild!!.roles.fetch(process.env.CUSTOMER_ROLE_ID!)
+		if (!role) throw new Error('Role is null')
+		const member = interaction.member!!
+		if (member.roles instanceof GuildMemberRoleManager) await member.roles.add(role)
+	} catch (e) {
+		if (e instanceof DiscordjsError)
+			console.error('Sir, we have customer\'s role issue here: ', e.message)
+	}
 }
