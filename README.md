@@ -1,4 +1,4 @@
-# anarchy-shop-bot
+# lemonade
 Typescript discord bot targeted for 2b2t (anarchy-like) servers shops.
 
 ## Lore
